@@ -1,4 +1,4 @@
-# 🏥 PMS - Hospital Management System
+# 🏥 HMIS - Hospital Management and Information System
 
 <p align="center">
   <img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white"/>
@@ -11,9 +11,9 @@
 
 ---
 
-## 👨💻 About PMS
+## 👨💻 About HMIS
 
-**PMS (Hospital Management System)** is a Django-based web application designed to manage all aspects of a hospital or clinic efficiently.  
+**HMIS (Hospital Management System)** is a Django-based web application designed to manage all aspects of a hospital or clinic efficiently.  
 It helps hospitals manage **patients, doctors, appointments, lab examinations, prescriptions, medicines, and finance**.
 
 Key features include:
@@ -57,5 +57,5 @@ Key features include:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/nasrat123/PMS.git
-cd PMS
+git clone https://github.com/nasrat123/HMIS.git
+cd HMIS
