@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if patient %}Edit{% else %}New{% endif %} patient{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-10 offset-lg-1">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-center">{% if patient %}Edit{% else %}Create{% endif %} patient</h4>
+          </div>
+          <div class="card-body">
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Full Name <span class="text-danger">*</span></label>
+                            {{ form.full_name }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Gender <span class="text-danger">*</span></label>
+                            {{ form.gender }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label> Sick Type<span class="text-danger">*</span></label>
+                            {{ form.sick_type }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Contact <span class="text-danger">*</span></label>
+                            {{ form.contact }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label> Age <span class="text-danger">*</span></label>
+                            {{ form.age }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Registration Date <span class="text-danger">*</span></label>
+                            {{ form.registration_date }}
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    
+                                    {{ form.address }}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                  
+                   
+                    
+                </div>
+            
+                <div class="m-t-20 text-center">
+                    <button type="submit" class="btn btn-primary submit-btn">Create Patient</button>
+                    <a href="{% url 'patient_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

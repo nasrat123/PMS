@@ -1,0 +1,31 @@
+
+{% extends "base.html" %}
+
+{% block title %}Delete invoice {% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-danger">Confirm Delete</h4>
+          </div>
+          <div class="card-body">
+            <p>Are you sure you want to delete the invoice for 
+              <b>{{ invoice.patient.full_name }}</b> 
+              Amount: <b>{{ invoice.amount }}</b> Service_Type: <b>{{ invoice.service_type }}</b> on {{ invoice.date }} ?
+            </p>
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Yes, Delete</button>
+              <a href="{% url 'invoice_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

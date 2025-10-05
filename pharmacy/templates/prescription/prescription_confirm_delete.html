@@ -1,0 +1,31 @@
+{# templates/prescriptions/prescription_confirm_delete.html #}
+{% extends "base.html" %}
+
+{% block title %}Delete Prescription{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-danger">Confirm Delete</h4>
+          </div>
+          <div class="card-body">
+            <p>Are you sure you want to delete the prescription for 
+              <b>{{ prescription.patient.full_name }}</b> 
+              by <b>{{ prescription.doctor.full_name }}</b> on {{ prescription.date }}?
+            </p>
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Yes, Delete</button>
+              <a href="{% url 'prescription_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Delete Lab Examination{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-6 offset-lg-3">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-danger">Confirm Delete</h4>
+          </div>
+          <div class="card-body">
+            <p>
+              Are you sure you want to delete the lab examination 
+              <strong>#{{ lab_exam.id }}</strong> for 
+              <strong>{{ lab_exam.patient.full_name }}</strong>?
+            </p>
+
+            <form method="post">
+              {% csrf_token %}
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="{% url 'lab_list' %}" class="btn btn-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

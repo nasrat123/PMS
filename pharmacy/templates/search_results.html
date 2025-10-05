@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+
+<div class="page-wrapper">
+<div class="container mt-4">
+    <h4>Search Results for "<strong>{{ query }}</strong>"</h4>
+    <hr>
+    {% if patients %}
+    <div class="col-sm-4 col-3">
+        <h4 class="page-title">Patients</h4>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>NO</th>
+                            <th>Full Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Phone</th>
+                            <th>Sick Type</th>
+                            <th>Registration Date</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>{{ patient.id }}</td>
+                            <td>{{ patient.full_name }}</td>
+                            <td>{{ patient.age }}</td>
+                            <td>{{ patient.gender }}</td>
+                            <td>{{ patient.contact }}</td>
+                            <td>{{ patient.sick_type }}</td>
+                            <td>{{ patient.registration_date }}</td>
+                            
+                            <td>
+                                <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-sm btn-info">View</a>
+                                <a href="{% url 'patient_update' patient.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{% url 'patient_delete' patient.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                        <td><h3>No Patient found.</h3> </td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if doctors %}
+        <h5>Doctors</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>NO</th>
+                                <th>Full Name</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Available_Days</th>
+                                <th>Specialization</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in doctors %}
+                            <tr>
+                                <td>{{ doctor.id }}</td>
+                                <td>{{ doctor.full_name }}</td>
+                                <td>{{ doctor.gender }}</td>
+                                <td>{{ doctor.contact }}</td>
+                                <td>{{ doctor.email }}</td>
+                                <td>{{ doctor.available_days }}</td>
+                                <td>{{ doctor.specialization }}</td>
+                                
+                                <td>
+                                    <a href="{% url 'doctor_detail' doctor.pk %}" class="btn btn-sm btn-info">View</a>
+                                    <a href="{% url 'doctor_update' doctor.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'doctor_delete' doctor.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                            <td><h3>No Doctor found.</h3> </td>
+                            </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    
+    
+    {% endif %}
+
+    {% if medicines %}
+        <h5>Medicines</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Generic Name</th>
+                                <th>Supplier</th>
+                                <th>Batch #</th>
+                                <th>Expiry Date</th>
+                                <th>Quantity</th>
+                                <th>Purchase Price</th>
+                                <th>Selling Price</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for medicine in medicines %}
+                            <tr>
+                                <td>{{ medicine.name }}</td>
+                                <td>{{ medicine.generic_name }}</td>
+                                <td>{{ medicine.supplier }}</td>
+                                <td>{{ medicine.batch_no }}</td>
+                                <td>{{ medicine.expiry_date }}</td>
+                                <td>{{ medicine.quantity }}</td>
+                                <td>{{ medicine.purchase_price }}</td>
+                                <td>{{ medicine.selling_price }}</td>
+                               
+                                <td>
+                                    <a href="{% url 'medicine_detail' medicine.pk %}" class="btn btn-sm btn-info">View</a>
+                                    <a href="{% url 'medicine_update' medicine.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'medicine_delete' medicine.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                            <td><h3>No Medicine found.</h3> </td>
+                            </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if suppliers %}
+        <h5>Suppliers</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>About</th>
+                                
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for supplier in suppliers %}
+                            <tr>
+                                <td>{{ supplier.name }}</td>
+                                <td>{{ supplier.contact }}</td>
+                                <td>{{ supplier.email }}</td>
+                                <td>{{ supplier.address }}</td>
+                                <td>{{ supplier.about|safe }}</td>
+                                
+                                <td>
+                                    <a href="{% url 'supplier_detail' supplier.pk %}" class="btn btn-sm btn-info">View</a>
+                                    <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                            <td><h3>No supplier found.</h3> </td>
+                            </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if lab_examinations %}
+        <h5>Lab Examinations</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Patient</th>
+                      <th>Doctor</th>
+                      <th>Date</th>
+                      <th>Total Price</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for exam in lab_examinations %}
+                    <tr>
+                      <td>{{ exam.id }}</td>
+                      <td>{{ exam.patient.full_name }}</td>
+                      <td>{{ exam.doctor.full_name }}</td>
+                      <td>{{ exam.date }}</td>
+                      <td>{{ exam.total_cost }} / AFN</td>
+                      <td>
+                        <a href="{% url 'lab_detail' exam.id %}" class="btn btn-sm btn-info">View</a>
+                        <a href="{% url 'lab_edit' exam.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'lab_delete' exam.id %}" class="btn btn-sm btn-danger">Delete</a>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="6" class="text-center">No lab examinations found.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+    {% endif %}
+
+    {% if prescriptions %}
+        <h5>Prescriptions</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+             <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Total Cost</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for prescription in prescriptions %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ prescription.patient.full_name }}</td>
+                    <td>{{ prescription.doctor.full_name }}</td>
+                    <td>{{ prescription.date }}</td>
+                    <td>{{ prescription.total_cost }}</td>
+                    <td>
+                        <a href="{% url 'prescription_detail' prescription.pk %}" class="btn btn-sm btn-info">View</a>
+                        <a href="{% url 'prescription_edit' prescription.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'prescription_delete' prescription.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center">No prescriptions found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+    {% endif %}
+
+    {% if invoices %}
+        <h5>Invoices</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="table-responsive">
+             <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Invoice ID</th>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Service Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice.id }}</td>
+                    <td>{{ invoice.patient.full_name }}</td>
+                    <td>{{ invoice.date }}</td>
+                    <td>{{ invoice.service_type }}</td>
+                    <td>{{ invoice.amount }}-AFN</td>
+                    <td>{{ invoice.status }}</td>
+                    
+                    <td>
+                        <a href="{% url 'invoice_update' invoice.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'invoice_delete' invoice.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                    
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">No invoices available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+    {% endif %}
+
+    {% if not patients and not doctors and not medicines and not suppliers and not lab_examinations and not prescriptions and not invoices %}
+        <h1>No results found for <strong>{{ query }}</strong>.</h1>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}
+

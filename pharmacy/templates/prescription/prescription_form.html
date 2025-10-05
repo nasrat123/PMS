@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if prescription %}Edit{% else %}New{% endif %} Prescription{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-10 offset-lg-1">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-center">{% if prescription %}Edit{% else %}Create{% endif %} Prescription</h4>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+
+              <!-- Top Section: Patient & Doctor -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Patient</label>
+                    <select name="patient" class="form-control">
+                      {% for patient in patients %}
+                        <option value="{{ patient.id }}" {% if prescription and prescription.patient.id == patient.id %}selected{% endif %}>
+                          {{ patient.full_name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Doctor</label>
+                    <select name="doctor" class="form-control">
+                      {% for doctor in doctors %}
+                        <option value="{{ doctor.id }}" {% if prescription and prescription.doctor.id == doctor.id %}selected{% endif %}>
+                          {{ doctor.full_name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" class="form-control"
+                           value="{% if prescription %}{{ prescription.date|date:'Y-m-d' }}{% endif %}">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Section: Diagnosis/Regimen (30%) + Medicines (70%) -->
+              <div class="row mb-3" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                <!-- Diagnosis & Regimen -->
+                <div class="col-md-4" style="border-right: 2px solid #ccc; padding-right: 15px;">
+                  <h5>Diagnosis & Regimen</h5>
+                  <div class="form-group">
+                    <label>Diagnosis</label>
+                    <textarea name="diagnosis" class="form-control" rows="5">{% if prescription %}{{ prescription.diagnosis }}{% endif %}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Regimen</label>
+                    <textarea name="regimen" class="form-control" rows="5">{% if prescription %}{{ prescription.regimen }}{% endif %}</textarea>
+                  </div>
+                </div>
+
+                <!-- Medicines -->
+                <div class="col-md-8" style="padding-left: 15px;">
+                  <h5>Medicines</h5>
+                  <div id="medicine-items">
+                    {% if prescription_items %}
+                      {% for item in prescription_items %}
+                        <div class="medicine-row row mb-2 align-items-center">
+                          <div class="col-md-5">
+                            <select name="medicine[]" class="form-control">
+                              {% for med in medicines %}
+                                <option value="{{ med.id }}" {% if item.medicine.id == med.id %}selected{% endif %}>
+                                  {{ med.name }}:({{ med.quantity }})
+                                </option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          <div class="col-md-3">
+                            <input type="text" name="dosage[]" placeholder="Dosage" class="form-control" value="{{ item.dosage }}">
+                          </div>
+                          <div class="col-md-2">
+                            <input type="number" name="quantity[]" placeholder="Qty" class="form-control" value="{{ item.quantity }}">
+                          </div>
+                          <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-row">X</button>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="medicine-row row mb-2 align-items-center">
+                        <div class="col-md-5">
+                          <select name="medicine[]" class="form-control">
+                            {% for med in medicines %}
+                              <option value="{{ med.id }}">{{ med.name }}:({{ med.quantity }})</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <input type="text" name="dosage[]" placeholder="Dosage" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                          <input type="number" name="quantity[]" placeholder="Qty" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                          <button type="button" class="btn btn-danger remove-row">X</button>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <button type="button" id="add-medicine" class="btn btn-info mt-2">+ Add Medicine</button>
+                </div>
+              </div>
+
+              <div class="text-right mt-3">
+                <button type="submit" class="btn btn-primary btn-lg">Save Prescription</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS for Adding/Removing Medicine Rows -->
+<script>
+document.getElementById("add-medicine").addEventListener("click", function() {
+  let row = document.querySelector(".medicine-row").cloneNode(true);
+  row.querySelectorAll("input").forEach(input => input.value = "");
+  row.querySelector("select").selectedIndex = 0;
+  document.getElementById("medicine-items").appendChild(row);
+});
+
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("remove-row")) {
+    let rows = document.querySelectorAll(".medicine-row");
+    if(rows.length > 1) {  // Ensure at least 1 row remains
+      e.target.closest(".medicine-row").remove();
+    }
+  }
+});
+</script>
+{% endblock %}

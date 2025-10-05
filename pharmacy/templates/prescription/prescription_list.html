@@ -1,0 +1,61 @@
+{# templates/prescriptions/prescription_list.html #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Prescriptions{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-sm-4 col-3">
+          <h4 class="page-title">Prescriptions</h4>
+      </div>
+      <div class="col-sm-8 col-9 text-right m-b-20">
+          <a href="{% url 'prescription_create' %}" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Add Prescription</a>
+      </div>
+  </div>
+        <div class="row">
+          <div class="col-md-12">
+              <div class="table-responsive">
+               <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+              <table class="table table-hover table-center mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Total Cost</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for prescription in prescriptions %}
+                  <tr>
+                    <td>{{ prescription.id }}</td>
+                    <td>{{ prescription.patient.full_name }}</td>
+                    <td>{{ prescription.doctor.full_name }}</td>
+                    <td>{{ prescription.date }}</td>
+                    <td>{{ prescription.total_cost }}</td>
+                    <td>
+                        <a href="{% url 'prescription_detail' prescription.pk %}" class="btn btn-sm btn-info">View</a>
+                        <a href="{% url 'prescription_edit' prescription.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'prescription_delete' prescription.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center">No prescriptions found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

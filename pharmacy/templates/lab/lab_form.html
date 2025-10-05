@@ -1,0 +1,142 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if lab_exam %}Edit{% else %}New{% endif %} Lab Examination
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-10 offset-lg-1">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-center">
+              {% if lab_exam %}Edit{% else %}Create{% endif %} Lab Examination
+            </h4>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+
+              <!-- Patient & Doctor -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Patient</label>
+                    <select name="patient" class="form-control">
+                      {% for patient in patients %}
+                        <option value="{{ patient.id }}"
+                          {% if lab_exam and lab_exam.patient.id == patient.id %}selected{% endif %}>
+                          {{ patient.full_name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Doctor</label>
+                    <select name="doctor" class="form-control">
+                      {% for doctor in doctors %}
+                        <option value="{{ doctor.id }}"
+                          {% if lab_exam and lab_exam.doctor and lab_exam.doctor.id == doctor.id %}selected{% endif %}>
+                          {{ doctor.full_name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                      <label>Date</label>
+                      <input type="date" name="date" class="form-control"
+                             value="{% if lab_exam %}{{ lab_exam.date|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                  </div>
+              </div>
+
+              
+
+              <!-- Lab Examinations -->
+              <div class="row mb-3" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                <div class="col-md-12">
+                  <h5>Lab Examinations</h5>
+                  <div id="lab-items">
+                    {% if items %}
+                      {% for item in items %}
+                        <div class="lab-row row mb-2 align-items-center">
+                          <div class="col-md-4">
+                            <input type="text" name="examination_type[]" class="form-control"
+                                   value="{{ item.examination_type }}" placeholder="Examination Type">
+                          </div>
+                          <div class="col-md-3">
+                            <input type="number" step="0.01" name="price[]" class="form-control"
+                                   value="{{ item.price }}" placeholder="Price">
+                          </div>
+                          <div class="col-md-4">
+                            <input type="text" name="result[]" class="form-control"
+                                   value="{{ item.result }}" placeholder="Result">
+                          </div>
+                          <div class="col-md-1">
+                            <button type="button" class="btn btn-danger remove-row">X</button>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="lab-row row mb-2 align-items-center">
+                        <div class="col-md-4">
+                          <input type="text" name="examination_type[]" class="form-control"
+                                 placeholder="Examination Type">
+                        </div>
+                        <div class="col-md-3">
+                          <input type="number" step="0.01" name="price[]" class="form-control"
+                                 placeholder="Price">
+                        </div>
+                        <div class="col-md-4">
+                          <input type="text" name="result[]" class="form-control"
+                                 placeholder="Result">
+                        </div>
+                        <div class="col-md-1">
+                          <button type="button" class="btn btn-danger remove-row">X</button>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <button type="button" id="add-lab" class="btn btn-info mt-2">+ Add Examination</button>
+                </div>
+              </div>
+
+              <!-- Save -->
+              <div class="text-right mt-3">
+                <button type="submit" class="btn btn-primary btn-lg">Save Lab Examination</button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS for Adding/Removing Rows -->
+<script>
+document.getElementById("add-lab").addEventListener("click", function() {
+  let row = document.querySelector(".lab-row").cloneNode(true);
+  row.querySelectorAll("input").forEach(input => input.value = "");
+  document.getElementById("lab-items").appendChild(row);
+});
+
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("remove-row")) {
+    let rows = document.querySelectorAll(".lab-row");
+    if (rows.length > 1) { // Keep at least one row
+      e.target.closest(".lab-row").remove();
+    }
+  }
+});
+</script>
+{% endblock %}

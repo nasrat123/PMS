@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Doctor Form{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+<div class="content">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h4 class="page-title">Add Doctor</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>User Name <span class="text-danger">*</span></label>
+                            {{ form.user }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Gender <span class="text-danger">*</span></label>
+                            {{ form.gender }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            {{ form.full_name }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Contact <span class="text-danger">*</span></label>
+                            {{ form.contact }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Email <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+    
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Available Days</label>
+                            {{ form.available_days }}
+                        </div>       
+                          
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Specialization</label>
+                                    {{ form.specialization }}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    
+                                    {{ form.address }}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Education</label>
+                                    {{ form.education }}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Experience</label>
+                                    {{ form.experience }}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                    
+                </div>
+            
+                <div class="m-t-20 text-center">
+                    <button type="submit" class="btn btn-primary submit-btn">Create Doctor</button>
+                    <a href="{% url 'doctor_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

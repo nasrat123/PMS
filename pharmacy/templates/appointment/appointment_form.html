@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if appointment %}Edit{% else %}New{% endif %} Appointment{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="content">
+    <div class="row">
+      <div class="col-lg-10 offset-lg-1">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title text-center">{% if appointment %}Edit{% else %}Create{% endif %} Appointment</h4>
+          </div>
+          <div class="card-body">
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Patient<span class="text-danger">*</span></label>
+                            {{ form.patient }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Doctor <span class="text-danger">*</span></label>
+                            {{ form.doctor }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Appointment Date <span class="text-danger">*</span></label>
+                            {{ form.appointment_date }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Status <span class="text-danger">*</span></label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    
+                </div>
+            
+                <div class="m-t-20 text-center">
+                    <button type="submit" class="btn btn-primary submit-btn">Create Appointment</button>
+                    <a href="{% url 'appointment_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

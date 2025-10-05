@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Medicine Form{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+<div class="content">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h4 class="page-title">Add Medicine</h4>
+        </div>
+    </div>
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Name <span class="text-danger">*</span></label>
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Generic Name <span class="text-danger">*</span></label>
+                            {{ form.generic_name }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label> Supplier<span class="text-danger">*</span></label>
+                            {{ form.supplier }}
+                            <label><a href="{% url 'supplier_create' %}">Add Supplier</a> </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Batch # <span class="text-danger">*</span></label>
+                            {{ form.batch_no }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label> Expiry Date <span class="text-danger">*</span></label>
+                            {{ form.expiry_date }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>quantity <span class="text-danger">*</span></label>
+                            {{ form.quantity }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Purchase Price <span class="text-danger">*</span></label>
+                            {{ form.purchase_price }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Selling Price <span class="text-danger">*</span></label>
+                            {{ form.selling_price }}
+                        </div>
+                    </div>
+                   
+
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    
+                                    {{ form.description }}
+                                </div>
+                            </div>  
+                        </div>
+                    </div>
+                  
+                   
+                    
+                </div>
+            
+                <div class="m-t-20 text-center">
+                    <button type="submit" class="btn btn-primary submit-btn">Create Patient</button>
+                    <a href="{% url 'medicine_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+
+<div class="container mt-4">
+  <h2 class="text-success">Welcome, Dr. {{ doctor.full_name }}</h2>
+
+  <div class="row">
+    <div class="col-md-3">
+      <div class="card shadow p-3 mb-4">
+        <h5>Total Appointments</h5>
+        <p class="text-primary">{{ total_appointments }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow p-3 mb-4">
+        <h5>Unique Patients</h5>
+        <p class="text-primary">{{ total_patients }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow p-3 mb-4">
+        <h5>Prescriptions Given</h5>
+        <p class="text-primary">{{ total_prescriptions }}</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow p-3 mb-4">
+        <h5>Total Earnings</h5>
+        <p class="text-primary">${{ total_earnings }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
