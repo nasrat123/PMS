@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+    <li class="active"> Dashboard</li>
+{% endblock %}
+
+{% block extra_css %}
+       
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="row">
+            
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg2"><i class="fa fa-money"></i></span>
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ total_income|floatformat:2 }}</h3>
+                        <span class="widget-title2">Total Income <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg3"><i class="fa fa-money" aria-hidden="true"></i></span>
+                    
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ total_expense|floatformat:2 }}</h3>
+                        <span class="widget-title3">Total Expense <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg4"><i class="fa fa-money" aria-hidden="true"></i></span>
+                    
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ net_balance|floatformat:2 }}</h3>
+                        <span class="widget-title1">Net Balance <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                </div>
+            </div>
+          
+        </div>
+        
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-6 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title d-inline-block">Recent Incomes</h4> <a href="{% url 'invoice_list' %}" class="btn btn-primary float-right">View all</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            
+                        <table class="table table-striped">
+                            <thead><tr><th>ID</th><th>Date</th><th>Patient</th><th>Service</th><th>Amount</th></tr></thead>
+                            <tbody>
+                                {% for income in recent_incomes %}
+                                
+                                <tr>
+                                    <td><a href="{% url 'invoice_detail' income.id %}">{{ income.id }}</a></td>
+                                    
+                                    <td>{{ income.date|date:"M d, Y" }}</td>
+                                    <td>{{ income.patient.full_name }}</td>
+                                    <td>{{ income.service_type }}</td>
+                                    <td>{{ income.amount }} / AFN</td>
+                                     </a>
+                                </tr>
+                               
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center">No income records found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="col-12 col-md-6 col-lg-6 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title d-inline-block">Recent Expenses </h3> <a href="{% url 'expense_list' %}" class="btn btn-primary float-right">View all</a>
+                    </div>
+                    <div class="card-block">
+                        <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead><tr><th>ID</th><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+                            <tbody>
+                                {% for expense in recent_expenses %}
+                                <tr>
+                                    <td><a href="{% url 'expense_detail' expense.id %}">{{ expense.id }}</a></td>
+                                    <td>{{ expense.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ expense.description }}</td>
+                                    <td>{{ expense.amount }} / AFN</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center">No expense records found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}

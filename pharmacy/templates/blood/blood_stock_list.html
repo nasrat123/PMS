@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="page-wrapper">
+  <div class="container mt-4">
+    <div class="page-header d-flex align-items-center justify-content-between">
+      <h4 class="page-title">Blood Stock</h4>
+      <small class="text-muted">Units are counted in bags/units</small>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-hover table-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Blood Group</th>
+              <th>Quantity (Units)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in stocks %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ s.blood_group.name }}</td>
+              <td>{{ s.quantity }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center">No stock records found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

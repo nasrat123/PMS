@@ -9,12 +9,65 @@ from .models import (
     Prescription,
     PrescriptionItem,
     Invoice,
-    LabExaminationItem
+    LabExaminationItem,
+    Expense,
+    Employee,
+    Department,
+    BloodGroup,
+    BloodStock,
+    Donor, 
+    BloodDonation, 
+    BloodRequest,
+    BirthRegistration
 )
+
+
+@admin.register(BloodGroup)
+class BloodGroupAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+@admin.register(BloodStock)
+class BloodStockAdmin(admin.ModelAdmin):
+    list_display = ('blood_group', 'quantity')
+
+@admin.register(Donor)
+class DonorAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'blood_group', 'phone', 'last_donation_date')
+    search_fields = ('full_name', 'phone')
+
+@admin.register(BloodDonation)
+class BloodDonationAdmin(admin.ModelAdmin):
+    list_display = ('donor','blood_group','units','donation_date')
+    search_fields = ('donor__full_name',)
+    date_hierarchy = 'donation_date'
+
+@admin.register(BloodRequest)
+class BloodRequestAdmin(admin.ModelAdmin):
+    list_display = ('patient','blood_group','units_required','status','request_date')
+    list_filter = ('status','blood_group')
+    search_fields = ('patient__full_name',)
+
+
+@admin.register(BirthRegistration)
+class BirthRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('baby_name','date_of_birth','time_of_birth','mother','doctor','delivery_type')
+    search_fields = ('baby_name','mother__full_name','father_name')
+    date_hierarchy = 'date_of_birth'
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('name','status')
+    search_fields = ('name',)
+
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'age', 'gender', 'contact', 'registration_date')
+    search_fields = ('full_name', 'contact')
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'age', 'gender', 'contact', 'join_date')
     search_fields = ('full_name', 'contact')
 
 @admin.register(Doctor)
@@ -26,6 +79,8 @@ class DoctorAdmin(admin.ModelAdmin):
 class SupplierAdmin(admin.ModelAdmin):
     list_display = ('name', 'contact', 'address')
     search_fields = ('name',)
+
+
 
 @admin.register(Medicine)
 class MedicineAdmin(admin.ModelAdmin):
@@ -68,3 +123,10 @@ class InvoiceAdmin(admin.ModelAdmin):
     list_display = ('patient', 'date', 'amount', 'service_type', 'status')
     list_filter = ('status', 'service_type')
     search_fields = ('patient__full_name',)
+
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'amount', 'date', 'added_by', 'created_at')
+    list_filter = ('category', 'date')
+    search_fields = ('title', 'description')

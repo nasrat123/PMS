@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block title %}invoice Detail{% endblock %}
-
-{% block content %}
+{% block extra_css %}
 <style>
   .prescription-container {
     max-width: 900px;
@@ -108,6 +107,9 @@
     }
   }
 </style>
+{% endblock %}
+{% block content %}
+
 
 <hr>
 <div class="page-wrapper">

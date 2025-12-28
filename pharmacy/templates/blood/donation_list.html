@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="container mt-4">
+
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="page-title">Donations</h3>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between mb-3">
+      <h4>Total Donations: <span class="text-danger">{{ donations.count }} </span></h4>
+      <a href="{% url 'donation_add' %}" class="btn btn-success">+ Add Donation</a>
+    </div>
+
+
+    <div class="col-md-12">
+      <div class="table-responsive">
+        <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+          <thead>
+
+            <tr>
+              <th>#</th>
+              <th>Donor</th>
+              <th>Blood Group</th>
+              <th>Units</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dn in donations %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><a href="{% url 'donor_detail' dn.donor.pk %}">{{ dn.donor.full_name }}</a></td>
+              <td>{{ dn.blood_group.name }}</td>
+              <td>{{ dn.units }}</td>
+              <td>{{ dn.donation_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">No donations recorded.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

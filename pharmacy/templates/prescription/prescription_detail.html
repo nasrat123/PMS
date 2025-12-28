@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block title %}Prescription Detail{% endblock %}
-
-{% block content %}
+{% block extra_css %}
 <style>
   .prescription-container {
     max-width: 900px;
@@ -108,8 +107,11 @@
     }
   }
 </style>
+{% endblock %}
+{% block content %}
 
-<hr>
+
+
 <div class="page-wrapper">
   <div class="content">
     <div class="prescription-container" id="printdiv">
@@ -149,7 +151,7 @@
 
         <!-- Medicines -->
         <div class="medicine-box"style="flex: 0 0 70%; border: 1px; solid #ccc; padding: 10px;">
-          <h5>Medicines</h5>
+          <h5><strong>Medicines</strong></h5>
           {% for item in prescription.items.all %}
           <div class="medicine-item">
             <p><strong>R/</strong> {{ item.medicine.name }}</p>

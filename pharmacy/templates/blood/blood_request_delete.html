@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="container mt-4">
+    <div class="card">
+      <div class="card-body">
+        <h5>Delete Request</h5>
+        <p>Are you sure to delete request for <strong>{{ object.patient }}</strong> ?</p>
+
+        <form method="post">
+          {% csrf_token %}
+          <button class="btn btn-danger">Delete</button>
+          <a href="{% url 'blood_request_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

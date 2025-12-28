@@ -4,14 +4,53 @@
 {% block content %}
     <div class="page-wrapper">
         <div class="content">
-            <div class="row">
-                <div class="col-sm-4 col-3">
-                    <h4 class="page-title">Patients</h4>
-                </div>
-                <div class="col-sm-8 col-9 text-right m-b-20">
-                    <a href="{% url 'patient_create' %}" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Add Patient</a>
-                </div>
-            </div>
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="page-title">Patients</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form method="get" class="row mb-4">
+          <div class="col-md-2">
+            <input type="text" name="search" class="form-control" placeholder="Search Full_Name..." value="{{ request.GET.search }}">
+          </div>
+    
+          <div class="col-md-2">
+            <select name="gender" class="form-control">
+              <option value="">Gender</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+
+            </select>
+          </div>
+          <div class="col-md-2">
+            <select name="department" class="form-control">
+              <option value="">Departments</option>
+              {% for department in departments %}
+              <option value="{{ department.id}}">{{ department.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <input type="date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+          </div>
+          <div class="col-md-2">
+            <input type="date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+          </div>
+        
+        </form>
+        
+        <div class="d-flex justify-content-between mb-3">
+          <h4>Total Patients: <span class="text-danger">{{ patients.count }} </span></h4>
+          <a href="{% url 'patient_create' %}" class="btn btn-success">+ Add Patient</a>
+        </div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="table-responsive">
@@ -34,7 +73,7 @@
                                     <td>{{ patient.id }}</td>
                                     <td>{{ patient.full_name }}</td>
                                     <td>{{ patient.age }}</td>
-                                    <td>{{ patient.gender }}</td>
+                                    <td>{{ patient.get_gender_display }}</td>
                                     <td>{{ patient.contact }}</td>
                                     <td>{{ patient.sick_type }}</td>
                                     <td>{{ patient.registration_date }}</td>

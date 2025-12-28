@@ -1,9 +1,23 @@
 # models.py
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
+
+# -------------------------------
+# Department model
+# -------------------------------
+class Department(models.Model):
+    name = models.CharField(max_length=100)
+    status = models.CharField(max_length=15)
+    about = models.TextField()
+
+    def __str__(self):
+        return self.name
+ 
 
 # -------------------------------
 # Patient model
@@ -13,7 +27,7 @@ class Patient(models.Model):
         ('M', 'Male'),
         ('F', 'Female')
     ]
-
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     full_name = models.CharField(max_length=100)
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
@@ -27,6 +41,32 @@ class Patient(models.Model):
 
 
 # -------------------------------
+# Employee model
+# -------------------------------
+class Employee(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female')
+    ]
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    employee_id = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100)
+    age = models.IntegerField()
+    email = models.EmailField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    contact = models.CharField(max_length=15)
+    role = models.CharField(max_length=15)
+    address = models.TextField()
+    join_date = models.DateField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.full_name
+
+
+
+# -------------------------------
 # Doctor model
 # -------------------------------
 class Doctor(models.Model):
@@ -34,7 +74,7 @@ class Doctor(models.Model):
         ('M', 'Male'),
         ('F', 'Female')
     ]
-
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
@@ -48,6 +88,138 @@ class Doctor(models.Model):
 
     def __str__(self):
         return self.full_name   # ✅ safer than user.get_full_name()
+
+
+# -------------------------------
+# Blood model
+# -------------------------------
+class BloodGroup(models.Model):
+    BLOOD_TYPES = [
+        ("A+", "A+"), ("A-", "A-"),
+        ("B+", "B+"), ("B-", "B-"),
+        ("O+", "O+"), ("O-", "O-"),
+        ("AB+", "AB+"), ("AB-", "AB-"),
+    ]
+
+    name = models.CharField(max_length=5, choices=BLOOD_TYPES, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class BloodStock(models.Model):
+    blood_group = models.OneToOneField(BloodGroup, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=0)  # in units/bags
+
+    def __str__(self):
+        return f"{self.blood_group} - {self.quantity} Units"
+
+
+class Donor(models.Model):
+    GENDER_CHOICES = [
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
+    ]
+
+    full_name = models.CharField(max_length=150)
+    age = models.PositiveIntegerField()
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
+    blood_group = models.ForeignKey(BloodGroup, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20)
+    address = models.CharField(max_length=255)
+    last_donation_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.blood_group})"
+
+
+class BloodDonation(models.Model):
+    donor = models.ForeignKey(Donor, on_delete=models.CASCADE)
+    blood_group = models.ForeignKey(BloodGroup, on_delete=models.CASCADE)
+    units = models.PositiveIntegerField(default=1)
+    donation_date = models.DateField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        """Update stock automatically when donation saved"""
+        super().save(*args, **kwargs)
+        stock, created = BloodStock.objects.get_or_create(blood_group=self.blood_group)
+        stock.quantity += self.units
+        stock.save()
+
+    def __str__(self):
+        return f"Donation: {self.donor} - {self.units} Units"
+
+
+class BloodRequest(models.Model):
+    STATUS = [
+        ("Pending", "Pending"),
+        ("Approved", "Approved"),
+        ("Rejected", "Rejected"),
+        ("Issued", "Issued"),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True)
+    blood_group = models.ForeignKey(BloodGroup, on_delete=models.CASCADE)
+    units_required = models.PositiveIntegerField(default=1)
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS, default="Pending")
+    request_date = models.DateTimeField(auto_now_add=True)
+    issued_date = models.DateTimeField(null=True, blank=True)
+
+    def issue_blood(self):
+        """Decrease blood stock when issued"""
+        stock = BloodStock.objects.get(blood_group=self.blood_group)
+        if stock.quantity >= self.units_required:
+            stock.quantity -= self.units_required
+            stock.save()
+            self.status = "Issued"
+            self.issued_date = timezone.now()
+            self.save()
+            return True
+        return False
+
+    def __str__(self):
+        return f"Request {self.patient} - {self.blood_group}"
+
+
+# -------------------------------
+# Birht Regisration model
+# -------------------------------
+class BirthRegistration(models.Model):
+    GENDER = [
+        ("Male", "Male"),
+        ("Female", "Female"),
+    ]
+
+    DELIVERY_TYPE = [
+        ("Normal", "Normal Delivery"),
+        ("Cesarean", "Cesarean (C-Section)"),
+        ("Assisted", "Assisted Delivery"),
+    ]
+
+    baby_name = models.CharField(max_length=150, blank=True, null=True)
+    gender = models.CharField(max_length=10, choices=GENDER)
+    weight_kg = models.DecimalField(max_digits=4, decimal_places=2, help_text="Baby weight in Kg")
+
+    date_of_birth = models.DateField(default=timezone.now)
+    time_of_birth = models.TimeField(default=timezone.now)
+
+    mother = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="mother_births")
+    father_name = models.CharField(max_length=150, null=True, blank=True)
+    address = models.CharField(max_length=255)
+
+    doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True)
+    delivery_type = models.CharField(max_length=20, choices=DELIVERY_TYPE)
+
+    remarks = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Birth Record - {self.baby_name or 'Baby'} ({self.date_of_birth})"
 
 
 # -------------------------------
@@ -134,6 +306,8 @@ class LabExaminationItem(models.Model):
         related_name="items"
     )
     examination_type = models.CharField(max_length=100)
+    unit = models.CharField(max_length=100)
+    normal = models.CharField(max_length=100)
     result = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -261,3 +435,28 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice for {self.patient.full_name} - {self.service_type}"
+
+
+class Expense(models.Model):
+    CATEGORY_CHOICES = [
+        ('salary', 'Salary'),
+        ('utilities', 'Utilities'),
+        ('supplies', 'Supplies'),
+        ('maintenance', 'Maintenance'),
+        ('other', 'Other'),
+    ]
+
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    date = models.DateField()
+    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.title} - {self.amount}"

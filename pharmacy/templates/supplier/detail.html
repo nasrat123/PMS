@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load group_tags %}
+
 {% block title %}supplier-{{supplier.name}}{% endblock %}
 {% block extra_css %}
 
@@ -30,7 +32,12 @@
             </div>
 
             <div class="col-sm-5 col-6 text-right m-b-30">
+                {% if user|has_group:"Admin" %}
                 <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit</a>
+                {% endif %}
+                {% if user|has_group:"Pharmacist" %}
+                <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit</a>
+                {% endif %}
             </div>
         </div>
         <div class="card-box profile-header">

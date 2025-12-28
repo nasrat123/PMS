@@ -1,0 +1,123 @@
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block breadcrumbs %}
+    <li class="active"> Dashboard</li>
+{% endblock %}
+
+{% block extra_css %}
+       
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg1"><i class="fa fa-user-md" aria-hidden="true"></i></span>
+                    <a href="{% url 'doctor_list' %}">
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ total_doctors }}</h3>
+                        <span class="widget-title1">Doctors <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg2"><i class="fa fa-wheelchair"></i></span>
+                    <a href="{% url 'patient_list' %}">
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ total_patients }}</h3>
+                        <span class="widget-title2">Patients <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg3"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    <a href="{% url 'appointment_list' %}">
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ total_appointments }}</h3>
+                        <span class="widget-title3">Appointments <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg4"><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                    <a href="{% url 'medicine_list' %}">
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ today_appointments }}</h3>
+                        <span class="widget-title4">Today’s Appointments <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    </a>
+                </div>
+            </div>
+          
+        </div>
+       
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-8 col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title d-inline-block">Upcoming Appointments</h4> <a href="{% url 'appointment_list' %}" class="btn btn-primary float-right">View all</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead class="d-none">
+                                    <tr>
+                                        <th>Patient Name</th>
+                                        <th>Doctor Name</th>
+                                        <th>Timing</th>
+                                        <th class="text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in recent_appointments %}
+                                    
+                                    <tr>
+                                        <td style="min-width: 200px;">
+                                            <a class="avatar" href="#">P</a>
+                                            <h2><a href="#">{{ appointment.patient.full_name }}</a></h2>
+                                        </td>                 
+                                        <td>
+                                            <h5 class="time-title p-0">Appointment With</h5>
+                                            <p>Dr. {{ appointment.doctor.full_name }}</p>
+                                        </td>
+                                        <td>
+                                            <h5 class="time-title p-0">Timing</h5>
+                                            <p>{{ appointment.appointment_date }}</p>
+                                        </td>
+                                        <td class="text-right">
+                                            <a href="{% url 'appointment_update' appointment.id %}" class="btn btn-outline-primary take-btn">Take up</a>
+                                        </td>
+                                    </tr>
+
+                                    {% empty %}
+                                    <tr><td colspan="6">No appointments available.</td></tr>
+                                    {% endfor %}
+                                    
+                                   
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+       
+    </div>
+    
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="container mt-4">
+        <div class="page-header">
+            <h4 class="page-title">{{ dept.name }}</h4>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Status:</strong> {{ dept.status }}</p>
+                <p><strong>Description:</strong> {{ dept.about }}</p>
+
+                <a href="{% url 'department_edit' dept.id %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'department_delete' dept.id %}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

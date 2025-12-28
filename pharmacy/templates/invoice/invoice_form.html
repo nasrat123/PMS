@@ -4,86 +4,88 @@
 
 {% block content %}
 <div class="page-wrapper">
-  <div class="content">
-    <div class="row">
-      <div class="col-lg-10 offset-lg-1">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title text-center">{% if invoice %}Edit{% else %}Create{% endif %} Invoice</h4>
-          </div>
-          <div class="card-body">
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                <ul>
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ field.label }}: {{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-            <form method="POST">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Patient <span class="text-danger">*</span></label>
-                            {{ form.patient }}
-                        </div>
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title text-center">{% if invoice %}Edit{% else %}Create{% endif %} Invoice</h4>
                     </div>
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Date <span class="text-danger">*</span></label>
-                            {{ form.date }}
+                    <div class="card-body">
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for field in form %}
+                                {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
                         </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label> Amount<span class="text-danger">*</span></label>
-                            {{ form.amount }}
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label>Service Type <span class="text-danger">*</span></label>
-                            {{ form.service_type }}
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label> Status <span class="text-danger">*</span></label>
-                            {{ form.status }}
-                        </div>
-                    </div>
-                    
-                    <div class="col-sm-12">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <label>Narration</label>
-                                    
-                                    {{ form.narrative }}
+                        {% endif %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Patient <span class="text-danger">*</span></label>
+                                        {{ form.patient }}
+                                    </div>
                                 </div>
-                            </div>  
-                        </div>
-                    </div>
-                  
-                   
-                    
-                </div>
-            
-                <div class="m-t-20 text-center">
-                    <button type="submit" class="btn btn-primary submit-btn">Create Invoice</button>
-                    <a href="{% url 'invoice_list' %}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Date <span class="text-danger">*</span></label>
+                                        {{ form.date }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label> Amount<span class="text-danger">*</span></label>
+                                        {{ form.amount }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Service Type <span class="text-danger">*</span></label>
+                                        {{ form.service_type }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label> Status <span class="text-danger">*</span></label>
+                                        {{ form.status }}
+                                    </div>
+                                </div>
 
+                                <div class="col-sm-12">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Narration</label>
+
+                                                {{ form.narrative }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+                            <div class="m-t-20 text-center">
+                                <button type="submit" class="btn btn-primary submit-btn">Create Invoice</button>
+                                <a href="{% url 'invoice_list' %}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 {% endblock %}

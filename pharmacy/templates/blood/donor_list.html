@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="container mt-4">
+
+    <div class="page-header">
+      <div class="row">
+        <div class="col-sm-12">
+          <h3 class="page-title">Donors</h3>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between mb-3">
+      <h4>Total Donors: <span class="text-danger">{{ donors.count }} </span></h4>
+      <a href="{% url 'donor_add' %}" class="btn btn-success">+ Add Donor</a>
+    </div>
+
+
+    <div class="col-md-12">
+      <div class="table-responsive">
+        <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+          <thead>
+
+            <tr>
+              <th>#</th>
+              <th>Full Name</th>
+              <th>Blood Group</th>
+              <th>Phone</th>
+              <th>Last Donation</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in donors %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td><a href="{% url 'donor_detail' d.pk %}">{{ d.full_name }}</a></td>
+              <td>{{ d.blood_group.name }}</td>
+              <td>{{ d.phone }}</td>
+              <td>{{ d.last_donation_date|default:"-" }}</td>
+              <td>
+                <a href="{% url 'donor_edit' d.pk %}" class="btn btn-sm btn-outline-warning">Edit</a>
+                <a href="{% url 'donor_delete' d.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="{% url 'donation_add' %}?donor={{ d.pk }}" class="btn btn-sm btn-outline-success">Donate</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center">No donors yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

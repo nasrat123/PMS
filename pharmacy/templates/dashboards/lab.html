@@ -1,146 +1,88 @@
-
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Lab Dashboard{% endblock %}
-
 {% block content %}
+
+
+
 <div class="page-wrapper">
-  <div class="content">
-    <h4 class="page-title">Lab Technician Dashboard</h4>
+    <div class="content">
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg1"><i class="fa fa-flask" aria-hidden="true"></i></span>
+                    <a href="{% url 'doctor_list' %}">
+                    <div class="dash-widget-info text-right">
+                        <h3>{{ total_exams }}</h3>
+                        <span class="widget-title1">Total Lab <i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    </a>
+                </div>
+            </div>
+          <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg1"><i class="fa fa-tint" aria-hidden="true"></i></span>
+                    <a href="{% url 'blood_dashboard' %}">
+                    <div class="dash-widget-info text-right">
+                        <h3>{{bloods.count}}</h3>
+                        <span class="widget-title1"> Blood<i class="fa fa-check" aria-hidden="true"></i></span>
+                    </div>
+                    </a>
+                </div>
+            </div>
 
-    <!-- Date Range Filter -->
-    <form method="get" class="row mb-4">
-      <div class="col-md-4">
-        <label>From</label>
-        <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
-      </div>
-      <div class="col-md-4">
-        <label>To</label>
-        <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
-      </div>
-      <div class="col-md-4 d-flex align-items-end">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
-      </div>
-    </form>
+           
+        </div>
 
-    <!-- Stats Cards -->
-    <div class="row">
-      <div class="col-md-3">
-        <div class="card dash-widget">
-          <div class="card-body text-center">
-            <h5>Total Exams</h5>
-            <h3>{{ total_exams }}</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card dash-widget">
-          <div class="card-body text-center">
-            <h5>Completed</h5>
-            <h3>{{ completed_exams }}</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card dash-widget">
-          <div class="card-body text-center">
-            <h5>Pending</h5>
-            <h3>{{ pending_exams }}</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card dash-widget">
-          <div class="card-body text-center">
-            <h5>Total Income</h5>
-            <h3>${{ total_income }}</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Chart -->
-    <div class="row mt-4">
-      <div class="col-md-12">
-        <div class="card card-chart">
-          <div class="card-header">
-            <h4 class="card-title">Examinations (Last 7 Days)</h4>
-          </div>
-          <div class="card-body">
-            <canvas id="labChart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Examinations -->
-    <div class="row mt-4">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <h4 class="card-title">Recent Lab Examinations</h4>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover">
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-8 col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title d-inline-block">Recent Lab examinations</h4> <a href="{% url 'lab_list' %}" class="btn btn-primary float-right">View all</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+               <table id="dynamic-table" class="table table-striped table-bordered table-hover">
                 <thead>
                   <tr>
+                    <th>ID</th>
                     <th>Patient</th>
                     <th>Doctor</th>
                     <th>Date</th>
-                    <th>Items</th>
+                    <th>Total Price</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for exam in recent_exams %}
                   <tr>
+                    <td>{{ exam.id }}</td>
                     <td>{{ exam.patient.full_name }}</td>
                     <td>{{ exam.doctor.full_name }}</td>
                     <td>{{ exam.date }}</td>
-                    <td>{{ exam.items.count }}</td>
+                    <td>{{ exam.total_cost }} / AFN</td>
+                    <td>
+                      <a href="{% url 'lab_detail' exam.id %}" class="btn btn-sm btn-info">View</a>
+                      <a href="{% url 'lab_update' exam.id %}" class="btn btn-sm btn-warning">Edit</a>
+                      <a href="{% url 'lab_delete' exam.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
                   </tr>
                   {% empty %}
-                  <tr><td colspan="4">No examinations found</td></tr>
+                  <tr>
+                    <td colspan="6" class="text-center">No lab examinations found.</td>
+                  </tr>
                   {% endfor %}
                 </tbody>
               </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+            
         </div>
-      </div>
+        
     </div>
-
-  </div>
+    
 </div>
 
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-      const ctx = document.getElementById("examChart");
-      if (ctx) {
-          new Chart(ctx, {
-              type: "bar",
-              data: {
-                  labels: {{ chart_labels|safe }},
-                  datasets: [{
-                      label: "Examinations",
-                      data: {{ chart_data|safe }},
-                      backgroundColor: "rgba(54, 162, 235, 0.6)"
-                  }]
-              },
-              options: {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                      y: { beginAtZero: true }
-                  }
-              }
-          });
-      }
-  });
-  </script>
-  
 {% endblock %}

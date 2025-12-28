@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block extra_css %}
+
+{% endblock %}
+{% block content %}
+
+
+
+<div class="page-wrapper">
+  <div class="container mt-4">
+    <div class="card shadow-sm" id="printdiv">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Birth Details: {{ birth.baby_name }} <button class="btn btn-primary"
+            onclick="printdiv('printdiv')">
+            <i class="fa fa-print"></i>
+          </button></h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-6">
+
+            <p><strong>Mother Name:</strong> {{ birth.mother.full_name }}</p>
+            <p><strong>Father Name:</strong> {{ birth.father_name }}</p>
+            <p><strong>Gender:</strong> {{ birth.gender }}</p>
+            <p><strong>Date of Birth:</strong> {{ birth.date_of_birth }}</p>
+            <p><strong>Time of Birth:</strong> {{ birth.time_of_birth }}</p>
+
+          </div>
+          <div class="col-sm-6">
+            <p><strong>Doctor:</strong> {{ birth.doctor }}</p>
+            <p><strong>Registered On:</strong> {{ birth.created_at }}</p>
+            <p><strong>Delivery Type:</strong> {{ birth.delivery_type }}</p>
+            <p><strong>Remark:</strong> {{ birth.remarks }}</p>
+            <p><strong>Address:</strong> {{ birth.address }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+<hr>
+
+{% block extra_js %}
+<script>
+  function printdiv(printdiv) {
+    var printContents = document.getElementById(printdiv).innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+  }
+</script>
+{% endblock %}
+{% endblock %}

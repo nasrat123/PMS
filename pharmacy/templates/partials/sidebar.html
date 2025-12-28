@@ -1,10 +1,29 @@
+{% load group_tags %}
 <div class="sidebar" id="sidebar">
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
-                <li class="menu-title">Main</li>
                 <li>
+
+                    {% if user|has_group:"Admin" %}
                     <a href="{% url 'admin_dashboard' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+                    {% endif %}
+                    {% if user|has_group:"Doctor" %}
+                    <a href="{% url 'doctor_dashboard' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+                    {% endif %}
+                    {% if user|has_group:"Finance" %}
+                    <a href="{% url 'finance_dashboard' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+                    {% endif %}
+                    {% if user|has_group:"Lab Rant" %}
+                    <a href="{% url 'lab_dashboard' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+                    {% endif %}
+                    {% if user|has_group:"Pharmacist" %}
+                    <a href="{% url 'pharmacist_dashboard' %}"><i class="fa fa-dashboard"></i>
+                        <span>Dashboard</span></a>
+                    {% endif %}
+                    {% if user|has_group:"Reception" %}
+                    <a href="{% url 'reception_dashboard' %}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a>
+                    {% endif %}
                 </li>
                 <li>
                     <a href="{% url 'doctor_list' %}"><i class="fa fa-user-md"></i> <span>Doctors</span></a>
@@ -17,39 +36,100 @@
                 </li>
 
                 <li>
-                    <a href="{% url 'medicine_list' %}"><i class="fa fa-medkit"></i> <span>Medicines</span></a>
+                    <a href="{% url 'medicine_list' %}"><i class="fa fa-medkit"></i> <span>Pharmacy</span></a>
                 </li>
-                
+
                 <li>
                     <a href="{% url 'lab_list' %}"><i class="fa fa-flask"></i> <span>Lab Examinations</span></a>
                 </li>
                 <li>
-                    <a href="{% url 'prescription_list' %}"><i class="fa fa-file-text"></i> <span>Prescription</span></a>
+                    <a href="{% url 'prescription_list' %}"><i class="fa fa-file-text"></i>
+                        <span>Prescription</span></a>
                 </li>
                 <li>
                     <a href="{% url 'supplier_list' %}"><i class="fa fa-truck"></i> <span>Supplier</span></a>
                 </li>
-                
+                <li>
+                    <a href="{% url 'department_list' %}"><i class="fa fa-hospital-o"></i> <span>Department</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'employee_list' %}"><i class="fa fa-users"></i> <span>Employees</span></a>
+                </li>
+
+                <li>
+                    <a href="{% url 'birth_list' %}"><i class="fa fa-users me-2"></i> <span>Birth Register</span></a>
+                </li>
                 <li class="submenu">
+                    <a href="#">
+                        <i class="fa fa-tint"></i> <span> Blood Bank </span> <span class="menu-arrow"></span>
+                    </a>
+                    <ul style="display: none;">
+
+                        <li>
+                            <a href="{% url 'blood_dashboard' %}">
+                                <i class="fa fa-dashboard me-2"></i> Blood Bank Dashboard
+                            </a>
+                        </li>
+
+
+                        <li>
+                            <a href="{% url 'blood_stock_list' %}">
+                                <i class="fa fa-database me-2"></i> Blood Stock
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'donor_list' %}">
+                                <i class="fa fa-users me-2"></i> Donors
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'donation_list' %}">
+                                <i class="fa fa-heartbeat me-2"></i> Donations
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'blood_request_list' %}">
+                                <i class="fa fa-ambulance me-2"></i> Blood Requests
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'blood_group_list' %}">
+                                <i class="fa fa-list-alt me-2"></i> Blood Groups
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+
+
+                
+                {% if user|has_group:"Finance" %}
+                <li class="submenu">
+
                     <a href="#"><i class="fa fa-money"></i> <span> Accounts </span> <span class="menu-arrow"></span></a>
                     <ul style="display: none;">
                         <li><a href="{% url 'invoice_list' %}">Invoices</a></li>
-                        <li><a href="expenses.html">Expenses</a></li>
-                        <li><a href="expenses.html">Sallary</a></li>
+                        <li><a href="{% url 'expense_list' %}">Expenses</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user|has_group:"Admin" %}
                 <li class="submenu">
-                    <a href="#"><i class="fa fa-user"></i> <span> Employees </span> <span class="menu-arrow"></span></a>
+
+                    <a href="#"><i class="fa fa-money"></i> <span> Accounts </span> <span class="menu-arrow"></span></a>
                     <ul style="display: none;">
-                        <li><a href="employees.html">Employees List</a></li>
-                        <li><a href="leaves.html">Leaves</a></li>
-                        <li><a href="holidays.html">Holidays</a></li>
-                        <li><a href="attendance.html">Attendance</a></li>
+                        <li><a href="{% url 'invoice_list' %}">Invoices</a></li>
+                        <li><a href="{% url 'expense_list' %}">Expenses</a></li>
                     </ul>
                 </li>
+                {% endif %}
+
             </ul>
         </div>
     </div>
 </div>
-
-

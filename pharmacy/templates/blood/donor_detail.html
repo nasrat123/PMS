@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-wrapper">
+  <div class="container mt-4">
+    <div class="page-header d-flex align-items-center justify-content-between">
+      <h4 class="page-title">Donor Details</h4>
+      <div>
+        <a href="{% url 'donor_edit' object.pk %}" class="btn btn-warning">Edit</a>
+        <a href="{% url 'donor_delete' object.pk %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'donation_add' %}?donor={{ object.pk }}" class="btn btn-success">New Donation</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-3">Full name</dt>
+          <dd class="col-sm-9">{{ object.full_name }}</dd>
+
+          <dt class="col-sm-3">Age / Gender</dt>
+          <dd class="col-sm-9">{{ object.age }} / {{ object.gender }}</dd>
+
+          <dt class="col-sm-3">Blood Group</dt>
+          <dd class="col-sm-9">{{ object.blood_group.name }}</dd>
+
+          <dt class="col-sm-3">Phone</dt>
+          <dd class="col-sm-9">{{ object.phone }}</dd>
+
+          <dt class="col-sm-3">Address</dt>
+          <dd class="col-sm-9">{{ object.address }}</dd>
+
+          <dt class="col-sm-3">Last Donation</dt>
+          <dd class="col-sm-9">{{ object.last_donation_date|default:"-" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block title %}Delete invoice {% endblock %}
@@ -13,9 +12,10 @@
             <h4 class="card-title text-danger">Confirm Delete</h4>
           </div>
           <div class="card-body">
-            <p>Are you sure you want to delete the invoice for 
-              <b>{{ invoice.patient.full_name }}</b> 
-              Amount: <b>{{ invoice.amount }}</b> Service_Type: <b>{{ invoice.service_type }}</b> on {{ invoice.date }} ?
+            <p>Are you sure you want to delete the invoice for
+              <b>{{ invoice.patient.full_name }}</b>
+              Amount: <b>{{ invoice.amount }}</b> Service_Type: <b>{{ invoice.service_type }}</b> on {{ invoice.date }}
+              ?
             </p>
             <form method="post">
               {% csrf_token %}

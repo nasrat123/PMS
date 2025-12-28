@@ -3,53 +3,52 @@
 
 {% block content %}
 <div class="page-wrapper">
-<div class="container mt-5">
-    <h2 class="mb-4">Medicine Detail: {{ medicine.name }}</h2>
+    <div class="container mt-5">
+        <h2 class="mb-4">Medicine Detail: {{ medicine.name }}</h2>
 
-    <div class="card p-3 mb-4">
-        <h5>Basic Info</h5>
-        <p><strong>Supplier:</strong> {{ medicine.supplier.name }}</p>
-        <p><strong>Stock:</strong> {{ medicine.quantity }}</p>
-        <p><strong>Price:</strong> {{ medicine.selling_price }}</p>
-        <p><strong>Expiry Date:</strong> 
-            <span class="{% if is_expired %}text-danger{% endif %}">
-                {{ medicine.expiry_date }}
-            </span>
-        </p>
-    </div>
+        <div class="card p-3 mb-4">
+            <h5>Basic Info</h5>
+            <p><strong>Supplier:</strong> {{ medicine.supplier.name }}</p>
+            <p><strong>Stock:</strong> {{ medicine.quantity }}</p>
+            <p><strong>Price:</strong> {{ medicine.selling_price }}</p>
+            <p><strong>Expiry Date:</strong>
+                <span class="{% if is_expired %}text-danger{% endif %}">
+                    {{ medicine.expiry_date }}
+                </span>
+            </p>
+        </div>
 
-    <div class="card p-3 mb-4">
-        <h5>Dashboard</h5>
-        <p><strong>Total Prescribed:</strong> {{ total_prescribed }}</p>
-        <p><strong>Total Sales:</strong> {{ total_sales }} AFN</p>
-    </div>
+        <div class="card p-3 mb-4">
+            <h5>Dashboard</h5>
+            <p><strong>Total Prescribed:</strong> {{ total_prescribed }}</p>
+            <p><strong>Total Sales:</strong> {{ total_sales }} AFN</p>
+        </div>
 
-    <div class="card p-3">
-        <h5>Prescriptions Using This Medicine</h5>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Prescription ID</th>
-                    <th>Quantity</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in prescriptions %}
-                <tr>
-                    <td>{{ item.prescription.id }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.prescription.date }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3">No prescriptions found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="card p-3">
+            <h5>Prescriptions Using This Medicine</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Prescription ID</th>
+                        <th>Quantity</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prescriptions %}
+                    <tr>
+                        <td>{{ item.prescription.id }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.prescription.date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">No prescriptions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 </div>
 {% endblock %}
-

@@ -1,0 +1,70 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div class="page-wrapper">
+<div class="container mt-4">
+<div class="page-header">
+  <h4 class="page-title">{{ view.object|default:"Add / Edit Donor" }}</h4>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          {{ form.full_name.label_tag }}
+          {{ form.full_name }}
+          {% if form.full_name.errors %}<div class="text-danger small">{{ form.full_name.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-2 mb-3">
+          {{ form.age.label_tag }}
+          {{ form.age }}
+          {% if form.age.errors %}<div class="text-danger small">{{ form.age.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4 mb-3">
+          {{ form.gender.label_tag }}
+          {{ form.gender }}
+          {% if form.gender.errors %}<div class="text-danger small">{{ form.gender.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          {{ form.blood_group.label_tag }}
+          {{ form.blood_group }}
+          {% if form.blood_group.errors %}<div class="text-danger small">{{ form.blood_group.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4 mb-3">
+          {{ form.phone.label_tag }}
+          {{ form.phone }}
+          {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4 mb-3">
+          {{ form.last_donation_date.label_tag }}
+          {{ form.last_donation_date }}
+          {% if form.last_donation_date.errors %}<div class="text-danger small">{{ form.last_donation_date.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.address.label_tag }}
+        {{ form.address }}
+        {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors }}</div>{% endif %}
+      </div>
+
+      <div class="mt-3">
+        <button class="btn btn-success">Save</button>
+        <a href="{% url 'donor_list' %}" class="btn btn-secondary ms-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+</div>
+{% endblock %}

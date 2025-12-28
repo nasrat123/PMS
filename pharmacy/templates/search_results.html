@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Search Results{% endblock %}
-
+{% load group_tags %}
 {% block content %}
 
 <div class="page-wrapper">
@@ -40,8 +40,10 @@
                             
                             <td>
                                 <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-sm btn-info">View</a>
+                               
                                 <a href="{% url 'patient_update' patient.pk %}" class="btn btn-sm btn-warning">Edit</a>
                                 <a href="{% url 'patient_delete' patient.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                
                             </td>
                         </tr>
                         {% empty %}
@@ -88,8 +90,10 @@
                                 
                                 <td>
                                     <a href="{% url 'doctor_detail' doctor.pk %}" class="btn btn-sm btn-info">View</a>
+                                     {% if user|has_group:"Admin" %}
                                     <a href="{% url 'doctor_update' doctor.pk %}" class="btn btn-sm btn-warning">Edit</a>
                                     <a href="{% url 'doctor_delete' doctor.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
@@ -140,8 +144,14 @@
                                
                                 <td>
                                     <a href="{% url 'medicine_detail' medicine.pk %}" class="btn btn-sm btn-info">View</a>
+                                    {% if user|has_group:"Admin" %}
                                     <a href="{% url 'medicine_update' medicine.pk %}" class="btn btn-sm btn-warning">Edit</a>
                                     <a href="{% url 'medicine_delete' medicine.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                    {% endif %}
+                                     {% if user|has_group:"Pharmacist" %}
+                                    <a href="{% url 'medicine_update' medicine.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'medicine_delete' medicine.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
@@ -185,8 +195,14 @@
                                 
                                 <td>
                                     <a href="{% url 'supplier_detail' supplier.pk %}" class="btn btn-sm btn-info">View</a>
+                                    {% if user|has_group:"Admin" %}
                                     <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-sm btn-warning">Edit</a>
                                     <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                    {% endif %}
+                                    {% if user|has_group:"Pharmacist" %}
+                                    <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
@@ -228,9 +244,19 @@
                       <td>{{ exam.total_cost }} / AFN</td>
                       <td>
                         <a href="{% url 'lab_detail' exam.id %}" class="btn btn-sm btn-info">View</a>
-                        <a href="{% url 'lab_edit' exam.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        {% if user|has_group:"Admin" %}
+                        <a href="{% url 'lab_update' exam.id %}" class="btn btn-sm btn-warning">Edit</a>
                         <a href="{% url 'lab_delete' exam.id %}" class="btn btn-sm btn-danger">Delete</a>
-                      </td>
+                        {% endif %}
+                        {% if user|has_group:"Lab Rant" %}
+                        <a href="{% url 'lab_update' exam.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'lab_delete' exam.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
+                        {% if user|has_group:"Doctor" %}
+                        <a href="{% url 'lab_update' exam.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'lab_delete' exam.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
+                    </td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -270,8 +296,18 @@
                     <td>{{ prescription.total_cost }}</td>
                     <td>
                         <a href="{% url 'prescription_detail' prescription.pk %}" class="btn btn-sm btn-info">View</a>
+                        {% if user|has_group:"Admin" %}
                         <a href="{% url 'prescription_edit' prescription.pk %}" class="btn btn-sm btn-warning">Edit</a>
                         <a href="{% url 'prescription_delete' prescription.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
+                        {% if user|has_group:"Doctor" %}
+                        <a href="{% url 'prescription_edit' prescription.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'prescription_delete' prescription.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
+                        {% if user|has_group:"Pharmacist" %}
+                        <a href="{% url 'prescription_edit' prescription.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'prescription_delete' prescription.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
                     </td>
                   </tr>
                   {% empty %}
@@ -314,8 +350,15 @@
                     <td>{{ invoice.status }}</td>
                     
                     <td>
+                        <a href="{% url 'invoice_detail' invoice.id %}" class="btn btn-sm btn-primary">View</a>
+                        {% if user|has_group:"Admin" %}
                         <a href="{% url 'invoice_update' invoice.id %}" class="btn btn-sm btn-warning">Edit</a>
                         <a href="{% url 'invoice_delete' invoice.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
+                        {% if user|has_group:"Finance" %}
+                        <a href="{% url 'invoice_update' invoice.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'invoice_delete' invoice.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
                     </td>
                     
                 </tr>
@@ -335,5 +378,6 @@
 
 </div>
 </div>
+
 {% endblock %}
 

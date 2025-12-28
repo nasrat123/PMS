@@ -68,17 +68,25 @@
                     {% if items %}
                       {% for item in items %}
                         <div class="lab-row row mb-2 align-items-center">
-                          <div class="col-md-4">
+                          <div class="col-md-3">
                             <input type="text" name="examination_type[]" class="form-control"
                                    value="{{ item.examination_type }}" placeholder="Examination Type">
                           </div>
-                          <div class="col-md-3">
-                            <input type="number" step="0.01" name="price[]" class="form-control"
-                                   value="{{ item.price }}" placeholder="Price">
+                          <div class="col-md-2">
+                            <input type="text" name="unit[]" class="form-control"
+                                   value="{{ item.unit }}" placeholder="Unit">
                           </div>
-                          <div class="col-md-4">
+                          <div class="col-md-2">
+                            <input type="text" name="normal[]" class="form-control"
+                                   value="{{ item.normal }}" placeholder="Normal Rang">
+                          </div>
+                          <div class="col-md-2">
                             <input type="text" name="result[]" class="form-control"
                                    value="{{ item.result }}" placeholder="Result">
+                          </div>
+                          <div class="col-md-2">
+                            <input type="number" step="0.01" name="price[]" class="form-control"
+                                   value="{{ item.price }}" placeholder="Price">
                           </div>
                           <div class="col-md-1">
                             <button type="button" class="btn btn-danger remove-row">X</button>
@@ -87,17 +95,26 @@
                       {% endfor %}
                     {% else %}
                       <div class="lab-row row mb-2 align-items-center">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                           <input type="text" name="examination_type[]" class="form-control"
                                  placeholder="Examination Type">
                         </div>
-                        <div class="col-md-3">
-                          <input type="number" step="0.01" name="price[]" class="form-control"
-                                 placeholder="Price">
+                        <div class="col-md-2">
+                          <input type="text" name="unit[]" class="form-control"
+                                 placeholder=" Unit">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-2">
+                          <input type="text" name="normal[]" class="form-control"
+                                 placeholder=" Normal Rang">
+                        </div>
+                        
+                        <div class="col-md-2">
                           <input type="text" name="result[]" class="form-control"
                                  placeholder="Result">
+                        </div>
+                        <div class="col-md-2">
+                          <input type="number" step="0.01" name="price[]" class="form-control"
+                                 placeholder="Price">
                         </div>
                         <div class="col-md-1">
                           <button type="button" class="btn btn-danger remove-row">X</button>

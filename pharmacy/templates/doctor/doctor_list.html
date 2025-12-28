@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load group_tags %}
 {% block title %}Doctors{% endblock %}
 {% block content %}
 <div class="page-wrapper">
@@ -9,7 +10,10 @@
                 <h4 class="page-title">Doctors</h4>
             </div>
             <div class="col-sm-8 col-9 text-right m-b-20">
-                <a href="{% url 'doctor_create' %}" class="btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Add Doctor</a>
+                {% if user|has_group:"Admin" %}
+                <a href="{% url 'doctor_create' %}" class="btn btn-primary btn-rounded float-right"><i
+                        class="fa fa-plus"></i> Add Doctor</a>
+                {% endif %}
             </div>
         </div>
         <div class="row doctor-grid">
@@ -17,16 +21,22 @@
             <div class="col-md-4 col-sm-4  col-lg-3">
                 <div class="profile-widget">
                     <div class="doctor-img">
-                        <a class="avatar" href="{% url 'doctor_detail' doctor.pk %}"><img alt="" src="{% static 'img/doctor-thumb-03.jpg' %}"></a>
+                        <a class="avatar" href="{% url 'doctor_detail' doctor.pk %}"><img alt=""
+                                src="{% static 'img/doctor-thumb-03.jpg' %}"></a>
                     </div>
                     <div class="dropdown profile-action">
-                        <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                        <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i
+                                class="fa fa-ellipsis-v"></i></a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="{% url 'doctor_update' doctor.pk %}"><i class="fa fa-pencil m-r-5"></i> Edit</a>
-                            <a class="dropdown-item" href="{% url 'doctor_delete' doctor.pk %}"><i class="fa fa-trash-o m-r-5"></i> Delete</a>
+                            {% if user|has_group:"Admin" %}
+                            <a class="dropdown-item" href="{% url 'doctor_update' doctor.pk %}"><i
+                                    class="fa fa-pencil m-r-5"></i> Edit</a>
+                            <a class="dropdown-item" href="{% url 'doctor_delete' doctor.pk %}"><i
+                                    class="fa fa-trash-o m-r-5"></i> Delete</a>
+                            {% endif %}
                         </div>
                     </div>
-                    <h4 class="doctor-name text-ellipsis"><a href="{% url 'doctor_detail' doctor.pk %}">{{ doctor.full_name }}</a></h4>
+                    <h4 class="doctor-name text-ellipsis"><a href="{% url 'doctor_detail' doctor.pk %}">{{doctor.full_name }}</a></h4>
                     <div class="doc-prof">{{ doctor.specialization }}</div>
                     <div class="user-country">
                         <i class="fa fa-map-marker"></i>{{ doctor.available_days }}
@@ -36,12 +46,12 @@
             {% empty %}
             <h1>No doctors found.</h1>
             {% endfor %}
-            
-            </div>
-            
-            
+
         </div>
-      
+
+
     </div>
+
+</div>
 
 {% endblock %}

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
-{% block content %}
+{% block extra_css %}
 <style>
     .prescription-container {
       max-width: 900px;
@@ -106,19 +105,31 @@
       }
     }
   </style>
-<div class="page-wrapper">
+{% endblock %}
+{% block content %}
+
+<div class="page-wrapper" id="printdiv">
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Patient Profile: {{ patient.full_name }}</h4>
+            <h4 class="mb-0">Patient Profile: {{ patient.full_name }} <button class="btn btn-primary" onclick="printdiv('printdiv')">
+                <i class="fa fa-print"></i>
+                </button></h4>
         </div>
         <div class="card-body">
+          <div class="row">
+          <div class="col-sm-6">
+            <p><strong>Department:</strong> {{ patient.department.name }}</p>
             <p><strong>Age:</strong> {{ patient.age }}</p>
             <p><strong>Gender:</strong> {{ patient.get_gender_display }}</p>
             <p><strong>Contact:</strong> {{ patient.contact }}</p>
-            <p><strong>Address:</strong> {{ patient.address }}</p>
+          </div>
+          <div class="col-sm-6">
             <p><strong>Sick Type:</strong> {{ patient.sick_type }}</p>
             <p><strong>Registered On:</strong> {{ patient.registration_date }}</p>
+            <p><strong>Address:</strong> {{ patient.address }}</p>
+          </div>
+         </div>
         </div>
     </div>
 
@@ -189,30 +200,41 @@
                     </div>
                     <div class="diagnosis-medicine-section">
         
-                      <!-- Diagnosis & Regimen -->
-                      <div class="medicine-box" style="flex: 0 0 30%; border-left: 1px; padding: 10px;">
-                         <h5>Lab Examination Type </h5>
-                         {% for item in lab.items.all %}
-                        <p><strong>{{ item.examination_type }}:</strong></p>
-                        {% endfor %}
-                      </div>
-                      
-                      <!-- Medicines -->
-                      <div class="medicine-box"style="flex: 0 0 70%; border: 1px; solid #ccc; padding: 10px;">
-                        <h5>Result      _________     Normal Range</h5>
-                        {% for item in lab.items.all %}
-                        <div class="medicine-item">
-                          <p><strong>{{ item.result }}</strong>  _________ <strong>Normal Range</strong> </p>
-                          {% if item.instructions %}
-                          <p style="margin-left:20px; font-style:italic; color:#555;">{{ item.instructions }}</p>
-                          {% endif %}
-                        </div>
-                        {% empty %}
-                        <p>No Lab  Examination.</p>
-                        {% endfor %}
-                      <p dir="rtl">Total Cost ____________________________________________ :{{ lab.total_cost }} AFN</p> 
-                      </div>
-                      
+                     <!-- Medicines -->
+        <div class="medicine-box"style="flex: 0 0 90%; border: 1px; solid #ccc; padding: 10px;">
+          
+          <div class="medicine-item">
+             <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>Examination_Type</th>
+                    <th>Unit</th>
+                    <th>Normal Range</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in lab.items.all %}
+                  <tr>
+                    <td>{{ item.examination_type }}</td>
+                    <td>{{ item.unit }}</td>
+                    <td>{{ item.normal }}</td>
+                    <td>{{ item.result }}</td>
+                    
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center">No lab examinations found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+    
+        <p dir="rtl">Total Cost ____________________________________________ :{{ lab.total_cost }} AFN</p> 
+          </div>
+        
+        
+        </div>
                       
                     </div>
                     {% endfor %}
@@ -296,7 +318,7 @@
                             <tr>
                                 <td>{{ invoice.date }}</td>
                                 <td>{{ invoice.get_service_type_display }}</td>
-                                <td>${{ invoice.amount }}</td>
+                                <td>{{ invoice.amount }}-AFN</td>
                                 <td>
                                     <span class="badge {% if invoice.status == 'paid' %}bg-success{% else %}bg-danger{% endif %}">
                                         {{ invoice.get_status_display }}
@@ -314,5 +336,15 @@
 </div>
 </div>
 <hr>
+
+<script>
+	function printdiv(printdiv) {
+				var printContents = document.getElementById(printdiv).innerHTML;
+				var originalContents = document.body.innerHTML;
+				document.body.innerHTML = printContents;
+				window.print();
+				document.body.innerHTML = originalContents;
+			}
+</script>
 {% endblock %}
 
