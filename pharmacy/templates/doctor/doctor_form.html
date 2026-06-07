@@ -2,6 +2,30 @@
 {% load static %}
 {% block title %}Doctor Form{% endblock %}
 {% block content %}
+<style>
+.profile-img-wrap {
+    position: relative;
+}
+
+.fileupload {
+    position: absolute;
+    bottom: 0;
+    right: 40%;
+    background: #20c997;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.fileupload input.upload {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+</style>
+
 <div class="page-wrapper">
     <div class="content">
         <div class="row">
@@ -11,10 +35,28 @@
         </div>
         <div class="row">
             <div class="col-lg-8 offset-lg-2">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
 
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="profile-img-wrap text-center">
+                                <img id="imagePreview" src="{% if form.instance.photo %}
+                            {{ form.instance.photo.url }}
+                          {% else %}
+                            /static/assets/img/profiles/avatar-01.jpg
+                          {% endif %}" class="rounded-circle" width="150" height="150">
+
+                                <div class="fileupload btn mt-3">
+                                    <span class="btn-text">
+                                        <i class="feather-camera"></i>
+                                    </span>
+                                    <input type="file" name="photo" class="upload" accept="image/*"
+                                        onchange="previewImage(this)">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>User Name <span class="text-danger">*</span></label>
@@ -115,5 +157,17 @@
         </div>
     </div>
 </div>
+
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('imagePreview').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 
 {% endblock %}

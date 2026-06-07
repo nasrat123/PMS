@@ -48,6 +48,11 @@ class Employee(models.Model):
         ('M', 'Male'),
         ('F', 'Female')
     ]
+    photo = models.ImageField(
+        upload_to='employes/',
+        blank=True,
+        null=True
+    )
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     employee_id = models.CharField(max_length=100)
     full_name = models.CharField(max_length=100)
@@ -74,6 +79,11 @@ class Doctor(models.Model):
         ('M', 'Male'),
         ('F', 'Female')
     ]
+    photo = models.ImageField(
+        upload_to='doctors/',
+        blank=True,
+        null=True
+    )
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)

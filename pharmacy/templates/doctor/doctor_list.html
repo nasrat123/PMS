@@ -17,12 +17,14 @@
             </div>
         </div>
         <div class="row doctor-grid">
-            {% for doctor in doctors %}
+            {% for doctor in page_obj %}
             <div class="col-md-4 col-sm-4  col-lg-3">
                 <div class="profile-widget">
                     <div class="doctor-img">
-                        <a class="avatar" href="{% url 'doctor_detail' doctor.pk %}"><img alt=""
-                                src="{% static 'img/doctor-thumb-03.jpg' %}"></a>
+                        <a class="avatar" href="{% url 'doctor_detail' doctor.pk %}"><img
+                                src="{% if doctor.photo %}{{ doctor.photo.url }}{% else %}/static/assets/img/profiles/avatar-01.jpg{% endif %}"
+                                class="avatar avatar-sm me-2">
+                        </a>
                     </div>
                     <div class="dropdown profile-action">
                         <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i
@@ -36,7 +38,8 @@
                             {% endif %}
                         </div>
                     </div>
-                    <h4 class="doctor-name text-ellipsis"><a href="{% url 'doctor_detail' doctor.pk %}">{{doctor.full_name }}</a></h4>
+                    <h4 class="doctor-name text-ellipsis"><a
+                            href="{% url 'doctor_detail' doctor.pk %}">{{doctor.full_name }}</a></h4>
                     <div class="doc-prof">{{ doctor.specialization }}</div>
                     <div class="user-country">
                         <i class="fa fa-map-marker"></i>{{ doctor.available_days }}
@@ -49,7 +52,26 @@
 
         </div>
 
-
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                  <span class="page-link">
+                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                  </span>
+                </li>
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+              </ul>
+            </nav>
     </div>
 
 </div>

@@ -67,12 +67,12 @@ class PatientAdmin(admin.ModelAdmin):
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'age', 'gender', 'contact', 'join_date')
+    list_display = ('full_name', 'age', 'gender','photo', 'contact', 'join_date')
     search_fields = ('full_name', 'contact')
 
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'full_name', 'education', 'experience', 'specialization', 'contact', 'available_days')
+    list_display = ('user', 'full_name', 'photo', 'education', 'experience', 'specialization', 'contact', 'available_days')
     search_fields = ('user__username', 'specialization')
 
 @admin.register(Supplier)

@@ -46,7 +46,10 @@
                         <div class="profile-view">
                             <div class="profile-img-wrap">
                                 <div class="profile-img">
-                                    <a href="#"><img class="avatar" src="{% static 'img/doctor-03.jpg' %}" alt=""></a>
+                                    <a href="#"><img
+                                            src="{% if doctor.photo %}{{ doctor.photo.url }}{% else %}/static/assets/img/profiles/avatar-01.jpg{% endif %}"
+                                            class="avatar avatar-sm me-2">
+                                    </a>
                                 </div>
                             </div>
                             <div class="profile-basic">

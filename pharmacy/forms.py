@@ -9,6 +9,7 @@ class DoctorForm(forms.ModelForm):
         model = Doctor
         fields = '__all__'
         widgets = {
+            'photo':forms.ClearableFileInput(attrs={'class':'form-control'}),
             'user': forms.Select(attrs={'class': 'form-control'}),
             'department': forms.Select(attrs={'class': 'form-control'}),
             'full_name': forms.TextInput(attrs={'class': 'form-control'}),

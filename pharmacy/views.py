@@ -623,7 +623,10 @@ def doctor_dashboard(request):
 @login_required
 def doctor_list(request):
     doctors = Doctor.objects.all()
-    return render(request, 'doctor/doctor_list.html', {'doctors': doctors})
+    paginator = Paginator(doctors.order_by('-full_name'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'doctor/doctor_list.html', {'page_obj': page_obj})
 
 @login_required
 def doctor_detail(request, pk):
@@ -645,26 +648,34 @@ def doctor_detail(request, pk):
 @group_required('Admin')
 def doctor_create(request):
     if request.method == 'POST':
-        form = DoctorForm(request.POST)
+        form = DoctorForm(request.POST, request.FILES)
+
         if form.is_valid():
-            doctor = form.save(commit=False)
-            doctor.save()
-            messages.success(request, 'Record Inserted Successfully !')
+            form.save()
+            messages.success(request, 'Record Inserted Successfully!')
             return redirect('doctor_list')
+        else:
+            print(form.errors)  # 🔥 مهم debug
     else:
         form = DoctorForm()
     return render(request, 'doctor/doctor_form.html', {'form': form})
 
 
+
 @group_required('Admin')
 def doctor_update(request, pk):
     doctor = get_object_or_404(Doctor, pk=pk)
-    form = DoctorForm(request.POST or None, instance=doctor)
-    if form.is_valid():
-        form.save()
-        messages.success(request, "Doctor updated successfully.")
-        return redirect('doctor_list')
-    return render(request, 'doctor/doctor_form.html', {'form': form})
+
+    if request.method == 'POST':
+        form = DoctorForm(request.POST, request.FILES, instance=doctor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Doctor updated successfully.")
+            return redirect('doctor_list')
+    else:
+        form = DoctorForm(instance=doctor)
+
+    return render(request, 'doctor/doctor_form.html', {'form': form, 'doctor': doctor})
 
 
 @group_required('Admin')
@@ -705,15 +716,18 @@ def employee_list(request):
     if role:
         employees = employees.filter(role=role)
 
+    paginator = Paginator(employees.order_by('-join_date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'employee/employee_list.html', {
-        'employees': employees,'departments': departments,
+        'page_obj': page_obj,'departments': departments,
     })
 
 @login_required
 def employee_create(request):
     if request.method == 'POST':
-        form = EmployeeForm(request.POST)
+        form = EmployeeForm(request.POST, request.FILES )
         if form.is_valid():
             employee = form.save(commit=False)
             employee.save()
@@ -781,9 +795,12 @@ def patient_list(request):
     if start_date and end_date:
         patients = patients.filter(registration_date__range=[start_date, end_date])
 
+    paginator = Paginator(patients.order_by('-registration_date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'patient/patient_list.html', {
-        'patients': patients,'departments': departments,
+        'page_obj': page_obj,'departments': departments,
     })
 
 @login_required
@@ -836,10 +853,12 @@ def medicine_list(request):
     if supplier:
         medicines = medicines.filter(supplier__name__icontains=supplier)        
     
-
+    paginator = Paginator(medicines.order_by('-expiry_date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'medicine/medicine_list.html', {
-        'medicines': medicines,
+        'page_obj': page_obj,
     })
 
 @login_required
@@ -912,7 +931,11 @@ def supplier_list(request):
 
     if search:
         suppliers = suppliers.filter(name__icontains=search)
-    return render(request, 'supplier/supplier_list.html', {'suppliers': suppliers})
+
+    paginator = Paginator(suppliers.order_by('name'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'supplier/supplier_list.html', {'page_obj': page_obj})
 
 @login_required
 def supplier_detail(request, pk):
@@ -1000,7 +1023,11 @@ def lab_list(request):
         lab_exams = lab_exams.filter(doctor__full_name__icontains=doctor)       
     if start_date and end_date:
         lab_exams = lab_exams.filter(date__range=[start_date, end_date])
-    return render(request, "lab/lab_list.html", {"lab_exams": lab_exams})
+
+    paginator = Paginator(lab_exams.order_by('-date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "lab/lab_list.html", {"page_obj": page_obj})
 
 # Detail of a single lab examination (with items)
 @login_required
@@ -1136,7 +1163,11 @@ def appointment_list(request):
         appointments = appointments.filter(status=status)       
     if start_date and end_date:
         appointments = appointments.filter(appointment_date__range=[start_date, end_date])
-    return render(request, 'appointment/appointment_list.html', {'appointments': appointments})
+    
+    paginator = Paginator(appointments.order_by('-appointment_date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'appointment/appointment_list.html', {'page_obj': page_obj})
 
 @login_required
 def appointment_create(request):
@@ -1180,9 +1211,11 @@ def prescription_list(request):
     if start_date and end_date:
         prescriptions = prescriptions.filter(date__range=[start_date, end_date])
 
-
+    paginator = Paginator(prescriptions.order_by('-date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return render(request, 'prescription/prescription_list.html', {
-        'prescriptions': prescriptions,
+        'page_obj': page_obj,
     })
 
 @login_required
@@ -1322,8 +1355,12 @@ def invoice_list(request):
 
     total = invoices.aggregate(total=Sum('amount'))['total'] or 0
 
+    paginator = Paginator(invoices.order_by('-date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'invoice/invoice_list.html', {
-        'invoices': invoices,
+        'page_obj': page_obj,
         'total': total,
     })
 
@@ -1384,8 +1421,11 @@ def expense_list(request):
 
     total = expenses.aggregate(total=Sum('amount'))['total'] or 0
 
+    paginator = Paginator(expenses.order_by('-date'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return render(request, 'expenses/expense_list.html', {
-        'expenses': expenses,
+        'page_obj': page_obj,
         'total': total,
     })
 
