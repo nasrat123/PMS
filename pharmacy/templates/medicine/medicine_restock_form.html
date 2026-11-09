@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load group_tags %}
+{% block title %}Restock Medicine{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3 class="page-title">Restock Medicines</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            {% if messages %}
+
+            {% for message in messages %}
+
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+
+            {% endfor %}
+
+            {% endif %}
+
+
+            {% if form.non_field_errors %}
+
+            <div class="alert alert-danger">
+
+                {{ form.non_field_errors }}
+
+            </div>
+
+            {% endif %}
+
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Medicines <span class="text-danger">*</span></label>
+
+                            {{ form.medicine }}
+
+                            {% if form.medicine.errors %}
+
+                            <div class="text-danger">
+                                {{ form.medicine.errors }}
+                            </div>
+
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+
+
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Quantity Added <span class="text-danger">*</span></label>
+
+                            {{ form.quantity_added }}
+
+                            {% if form.quantity_added.errors %}
+
+                            <div class="text-danger">
+                                {{ form.quantity_added.errors }}
+                            </div>
+
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Restock Medicine
+                    </button>
+
+
+                    <a href="{% url 'medicine_list' %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

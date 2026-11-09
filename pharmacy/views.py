@@ -1,8 +1,12 @@
 from django.urls import reverse_lazy, reverse
 from django.views import View
+from pharmacy.services.prescription import ( create_prescription , update_prescription, delete_prescription )
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 )
+from django.db import transaction
+from django.views.decorators.http import require_http_methods
+
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, F
@@ -10,9 +14,15 @@ PAGINATE_BY = 20
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-import openpyxl
+import openpyxl 
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Font, Alignment, Border, Side
+
+
+
+
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
@@ -21,7 +31,7 @@ from django.db.models import Sum, Q, Count
 from django.utils import timezone
 from django.utils.timezone import now
 from datetime import timedelta, datetime, date
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.hashers import check_password
 import io
@@ -37,8 +47,8 @@ from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordResetForm
 from .decorators import group_required
-from .models import BloodGroup, BloodStock, Donor,BirthRegistration, BloodDonation, BloodRequest, Doctor, Patient , Medicine , Department, Employee, Supplier, Expense, LabExamination, LabExaminationItem, Appointment, Prescription,PrescriptionItem,Invoice
-from .forms import DonorForm, BloodDonationForm,BirthRegistrationForm, BloodGroupForm, BloodRequestForm, DoctorForm, PatientForm, MedicineForm, ExpenseForm, DepartmentForm, EmployeeForm, SupplierForm, LabExaminationForm, LabExaminationItemFormSet, PrescriptionForm, PrescriptionItemForm,AppointmentForm, InvoiceForm,PrescriptionItemFormSet
+from .models import BloodGroup,StockTransaction,  BloodStock, MedicineRestock, Donor,BirthRegistration, BloodDonation, BloodRequest, Doctor, Patient , Medicine , Department, Employee, Supplier, Expense, LabExamination, LabExaminationItem, Appointment, Prescription,PrescriptionItem,Invoice
+from .forms import DonorForm, BloodDonationForm, MedicineRestockForm, BirthRegistrationForm, BloodGroupForm, BloodRequestForm, DoctorForm, PatientForm, MedicineForm, ExpenseForm, DepartmentForm, EmployeeForm, SupplierForm, LabExaminationForm, LabExaminationItemFormSet, PrescriptionForm, PrescriptionItemForm,AppointmentForm, InvoiceForm,PrescriptionItemFormSet
 from django.forms import modelformset_factory
 
 
@@ -73,6 +83,11 @@ def get_filtered_expenses_from_request(request):
 
     return qs
 
+
+def pharmacist_or_admin(user):
+    return (
+        user.is_authenticated and user.groups.filter(name__in=['Admin', 'Pharmacist']).exists()
+    )
 
 # ======================== AUTHENTICATION VIEWS ========================
 def login_view(request):
@@ -142,7 +157,7 @@ def password_reset_view(request):
     return render(request, 'auth/password_reset.html', {'form': form})
 
 
-# ======================== SEARCH ALL ========================
+# ========================  Prfile View ========================
 @login_required
 def profile_view(request):
     user = request.user
@@ -840,26 +855,169 @@ def patient_delete(request, pk):
 # <======================================Medicine========================================>
 @login_required
 def medicine_list(request):
-    medicines = Medicine.objects.all()
+    # ==========================================
+    # 1. Current date
+    # ==========================================
+    today = timezone.localdate()
+    next_30_days = today + timedelta(days=30)
 
-    name = request.GET.get('name')
-    generic_name = request.GET.get('generic_name')
-    supplier = request.GET.get('supplier')
+    # ==========================================
+    # 2. Medicine status filter
+    # ==========================================
+    status = request.GET.get("status", "active").strip()
+
+    if status not in ["active", "inactive", "all"]:
+        status = "active"
+
+    medicines = Medicine.objects.select_related(
+        "supplier"
+    )
+
+    if status == "active":
+        medicines = medicines.filter(is_active=True)
+
+    elif status == "inactive":
+        medicines = medicines.filter(is_active=False)
+
+    # status == "all": no additional filter
+
+    # ==========================================
+    # 3. Search filters
+    # ==========================================
+    name = request.GET.get("name", "").strip()
+
+    generic_name = request.GET.get(
+        "generic_name", ""
+    ).strip()
+
+    supplier = request.GET.get(
+        "supplier", ""
+    ).strip()
+
+    batch_no = request.GET.get(
+        "batch_no", ""
+    ).strip()
 
     if name:
-        medicines = medicines.filter(name__icontains=name)
+        medicines = medicines.filter(
+            name__icontains=name
+        )
+
     if generic_name:
-        medicines = medicines.filter(generic_name__icontains=generic_name)
+        medicines = medicines.filter(
+            generic_name__icontains=generic_name
+        )
+
     if supplier:
-        medicines = medicines.filter(supplier__name__icontains=supplier)        
-    
-    paginator = Paginator(medicines.order_by('-expiry_date'), 10)
-    page_number = request.GET.get('page')
+        medicines = medicines.filter(
+            supplier__name__icontains=supplier
+        )
+
+    if batch_no:
+        medicines = medicines.filter(
+            batch_no__icontains=batch_no
+        )
+
+    # ==========================================
+    # 4. Stock status filter
+    # ==========================================
+    stock_status = request.GET.get(
+        "stock_status", ""
+    ).strip()
+
+    if stock_status == "low":
+        medicines = medicines.filter(
+            quantity__gt=0,
+            quantity__lte=10
+        )
+
+    elif stock_status == "out":
+        medicines = medicines.filter(
+            quantity=0
+        )
+
+    elif stock_status == "available":
+        medicines = medicines.filter(
+            quantity__gt=10
+        )
+
+    else:
+        stock_status = ""
+
+    # ==========================================
+    # 5. Expiry status filter
+    # ==========================================
+    expiry_status = request.GET.get(
+        "expiry_status", ""
+    ).strip()
+
+    if expiry_status == "expired":
+        medicines = medicines.filter(
+            expiry_date__lt=today
+        )
+
+    elif expiry_status == "expiring":
+        medicines = medicines.filter(
+            expiry_date__gte=today,
+            expiry_date__lte=next_30_days
+        )
+
+    elif expiry_status == "valid":
+        medicines = medicines.filter(
+            expiry_date__gt=next_30_days
+        )
+
+    else:
+        expiry_status = ""
+
+    # ==========================================
+    # 6. Total filtered medicines
+    # ==========================================
+    total_medicines = medicines.count()
+
+    # ==========================================
+    # 7. Pagination
+    # ==========================================
+    medicines = medicines.order_by(
+        "expiry_date",
+        "name"
+    )
+
+    paginator = Paginator(medicines, 10)
+
+    page_number = request.GET.get("page")
+
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'medicine/medicine_list.html', {
-        'page_obj': page_obj,
-    })
+    # ==========================================
+    # 8. Template context
+    # ==========================================
+    context = {
+        "page_obj": page_obj,
+        "medicine": page_obj,
+
+        "total_medicines": total_medicines,
+
+        "status": status,
+
+        "name": name,
+        "generic_name": generic_name,
+        "supplier": supplier,
+        "batch_no": batch_no,
+
+        "stock_status": stock_status,
+        "expiry_status": expiry_status,
+
+        "today": today,
+        "next_30_days": next_30_days,
+    }
+
+    return render(
+        request,
+        "medicine/medicine_list.html",
+        context
+    )
+
 
 @login_required
 def medicine_detail(request, pk):
@@ -888,40 +1046,294 @@ def restock_medicine(request, pk):
         messages.success(request, f"{medicine.name} restocked by {qty}.")
         return redirect("medicine_detail", pk=medicine.id)
     return render(request, "pharmacy/restock_form.html", {"medicine": medicine})
+ 
+@login_required
+def stock_history(request):
+    transactions = StockTransaction.objects.select_related(
+        "medicine",
+        "performed_by",
+        "prescription",
+    ).all()
+    
+    medicine = request.GET.get('medicine')
+    transaction_type = request.GET.get('transaction_type')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if medicine:
+        transactions = transactions.filter(medicine__name__icontains=medicine)
+    if transaction_type:
+        transactions = transactions.filter(transaction_type=transaction_type)       
+    if start_date and end_date:
+        transactions = transactions.filter(created_at__range=[start_date, end_date])
+
+    paginator = Paginator(transactions.order_by('-created_at'), 100)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request,"medicine/stock_history.html",{"page_obj":page_obj},)
 
 
 @login_required
+@user_passes_test(pharmacist_or_admin)
+@require_http_methods(["GET", "POST"])
+def stock_adjustment_create(request):
+    if request.method == "POST":
+        medicine_id = request.POST.get("medicine")
+        actual_quantity = request.POST.get("actual_quantity")
+        note = request.POST.get("note", "").strip()
+
+        # د درملو ټاکنه
+        if not medicine_id:
+            messages.error(request, "Please select a medicine.")
+            return redirect("stock_adjustment_create")
+
+        medicine = get_object_or_404(
+            Medicine,
+            pk=medicine_id
+        )
+
+        # غیرفعال درمل مه پرېږده چې موجودي یې اصلاح شي
+        if not medicine.is_active:
+            messages.error(
+                request,
+                "This medicine is inactive. Please activate it before adjusting stock."
+            )
+            return redirect("stock_adjustment_create")
+
+        # د حقیقي موجودۍ اعتبار
+        try:
+            actual_quantity = int(actual_quantity)
+
+            if actual_quantity < 0:
+                raise ValueError
+
+        except (TypeError, ValueError):
+            messages.error(
+                request,
+                "Please enter a valid actual quantity."
+            )
+            return redirect("stock_adjustment_create")
+
+        # د یادښت اوږدوالی
+        if len(note) > 255:
+            messages.error(
+                request,
+                "The adjustment note must not exceed 255 characters."
+            )
+            return redirect("stock_adjustment_create")
+
+        # د موجودۍ اصلاح په خوندي ډول ترسره کول
+        with transaction.atomic():
+
+            medicine = get_object_or_404(
+                Medicine.objects.select_for_update(),
+                pk=medicine.pk
+            )
+
+            # د دویم ځل لپاره د فعال حالت تایید
+            if not medicine.is_active:
+                messages.error(
+                    request,
+                    "This medicine is inactive. Please activate it before adjusting stock."
+                )
+                return redirect("stock_adjustment_create")
+
+            previous_quantity = medicine.quantity
+
+            difference = abs(
+                actual_quantity - previous_quantity
+            )
+
+            # که بدلون ته اړتیا نه وي
+            if actual_quantity == previous_quantity:
+                messages.info(
+                    request,
+                    "No adjustment needed. Stock quantity is already correct."
+                )
+                return redirect("stock_adjustment_create")
+
+            # د موجودۍ نوي کول
+            medicine.quantity = actual_quantity
+            medicine.save(update_fields=["quantity"])
+
+            # د موجودۍ د تاریخ ثبتول
+            StockTransaction.objects.create(
+                medicine=medicine,
+                transaction_type="ADJUSTMENT",
+                quantity=difference,
+                previous_quantity=previous_quantity,
+                new_quantity=actual_quantity,
+                performed_by=request.user,
+                note=note or "Stock adjusted to actual quantity",
+            )
+
+        messages.success(
+            request,
+            f"Stock adjusted successfully: "
+            f"{previous_quantity} → {actual_quantity}."
+        )
+
+        return redirect("stock_history")
+
+    # په فورم کې یوازې فعال درمل ښکاره کول
+    medicines = Medicine.objects.filter(
+        is_active=True
+    ).order_by("name")
+
+    return render(
+        request,
+        "medicine/stock_adjustment_form.html",
+        {"medicines": medicines},
+    )
+
+
+@login_required
+@user_passes_test(pharmacist_or_admin)
 def medicine_create(request):
     if request.method == 'POST':
         form = MedicineForm(request.POST)
+
         if form.is_valid():
-            medicine = form.save(commit=False)
-            medicine.save()
-            messages.success(request, 'Record Inserted Successfully !')
+            form.save()
+            messages.success(
+                request,
+                'Medicine added successfully!'
+            )
             return redirect('medicine_list')
     else:
         form = MedicineForm()
-    return render(request, 'medicine/medicine_form.html', {'form': form})
+
+    return render(
+        request,
+        'medicine/medicine_form.html',
+        {'form': form}
+    )
+
 
 @login_required
+@user_passes_test(pharmacist_or_admin)
 def medicine_update(request, pk):
     medicine = get_object_or_404(Medicine, pk=pk)
-    form = MedicineForm(request.POST or None, instance=medicine)
+
+    form = MedicineForm(
+        request.POST or None,
+        instance=medicine
+    )
+
     if form.is_valid():
         form.save()
-        messages.success(request, "Medicine updated successfully.")
+        messages.success(
+            request,
+            'Medicine updated successfully.'
+        )
         return redirect('medicine_list')
-    return render(request, 'medicine/medicine_form.html', {'form': form})
+
+    return render(
+        request,
+        'medicine/medicine_form.html',
+        {
+            'form': form,
+            'medicine': medicine,
+        }
+    )
 
 
 @login_required
+@user_passes_test(pharmacist_or_admin)
 def medicine_delete(request, pk):
     medicine = get_object_or_404(Medicine, pk=pk)
+
     if request.method == 'POST':
-        medicine.delete()
-        messages.success(request, "Medicine deleted.")
+        medicine.is_active = False
+        medicine.save(update_fields=['is_active'])
+
+        messages.success(
+            request,
+            f'{medicine.name} has been deactivated successfully.'
+        )
+
         return redirect('medicine_list')
-    return render(request, 'medicine/medicine_confirm_delete.html', {'medicine': medicine})
+
+    return render(
+        request,
+        'medicine/medicine_confirm_delete.html',
+        {'medicine': medicine}
+    )
+
+
+@login_required
+@user_passes_test(pharmacist_or_admin)
+def medicine_restock_create(request):
+    if request.method == "POST":
+        form = MedicineRestockForm(request.POST)
+
+        if form.is_valid():
+            restock = form.save(commit=False)
+
+            # Prevent restocking inactive medicines
+            if not restock.medicine.is_active:
+                messages.error(
+                    request,
+                    "This medicine is inactive. Please activate it before restocking."
+                )
+                return redirect("medicine_list")
+
+            # Record the user who performed the restock
+            restock.performed_by = request.user
+            restock.save()
+
+            messages.success(
+                request,
+                "Medicine restocked successfully."
+            )
+            return redirect("medicine_list")
+
+    else:
+        form = MedicineRestockForm()
+
+    return render(
+        request,
+        "medicine/medicine_restock_form.html",
+        {"form": form}
+    )
+
+
+
+@login_required
+@user_passes_test(pharmacist_or_admin)
+def medicine_toggle_status(request, pk):
+    if request.method != "POST":
+        messages.error(
+            request,
+            "Invalid request method."
+        )
+        return redirect("medicine_list")
+
+    medicine = get_object_or_404(
+        Medicine,
+        pk=pk
+    )
+
+    medicine.is_active = not medicine.is_active
+
+    medicine.save(
+        update_fields=["is_active"]
+    )
+
+    if medicine.is_active:
+        messages.success(
+            request,
+            f"{medicine.name} activated successfully."
+        )
+    else:
+        messages.success(
+            request,
+            f"{medicine.name} deactivated successfully."
+        )
+
+    return redirect("medicine_list")
+
 
 # <======================================Supplier========================================>
 @login_required
@@ -1225,110 +1637,385 @@ def prescription_detail(request, pk):
         "prescription": prescription
     })
 
-
 @login_required
 def prescription_create(request):
     patients = Patient.objects.all()
     doctors = Doctor.objects.all()
-    medicines = Medicine.objects.all()
+
+    # Only active medicines are available for new prescriptions
+    medicines = Medicine.objects.filter(
+        is_active=True
+    ).order_by("name")
 
     if request.method == "POST":
+
         patient_id = request.POST.get("patient")
         doctor_id = request.POST.get("doctor")
+
         diagnosis = request.POST.get("diagnosis")
         regimen = request.POST.get("regimen")
-
-        prescription = Prescription.objects.create(
-            patient_id=patient_id,
-            doctor_id=doctor_id,
-            diagnosis=diagnosis,
-            regimen=regimen
-        )
 
         medicine_ids = request.POST.getlist("medicine[]")
         dosages = request.POST.getlist("dosage[]")
         quantities = request.POST.getlist("quantity[]")
 
-        for med_id, dosage, qty in zip(medicine_ids, dosages, quantities):
-            if med_id and qty:
-                PrescriptionItem.objects.create(
-                    prescription=prescription,
-                    medicine_id=med_id,
-                    dosage=dosage,
-                    quantity=int(qty)
+        items = []
+
+        # Validate submitted medicine items
+        for med_id, dosage, qty in zip(
+            medicine_ids,
+            dosages,
+            quantities
+        ):
+            if not med_id and not qty:
+                continue
+
+            if not med_id or not qty:
+                messages.error(
+                    request,
+                    "Please select a medicine and enter its quantity."
+                )
+                return render(
+                    request,
+                    "prescription/prescription_form.html",
+                    {
+                        "patients": patients,
+                        "doctors": doctors,
+                        "medicines": medicines,
+                    }
                 )
 
-        return redirect("prescription_detail", pk=prescription.pk)
+            try:
+                medicine_id = int(med_id)
+                quantity = int(qty)
 
-    return render(request, "prescription/prescription_form.html", {
-        "patients": patients,
-        "doctors": doctors,
-        "medicines": medicines
-    })
+                if quantity < 1:
+                    raise ValueError
+
+            except (ValueError, TypeError):
+                messages.error(
+                    request,
+                    "Invalid medicine ID or quantity."
+                )
+                return render(
+                    request,
+                    "prescription/prescription_form.html",
+                    {
+                        "patients": patients,
+                        "doctors": doctors,
+                        "medicines": medicines,
+                    }
+                )
+
+            # Verify medicine exists and is active
+            medicine = Medicine.objects.filter(
+                pk=medicine_id,
+                is_active=True
+            ).first()
+
+            if medicine is None:
+                messages.error(
+                    request,
+                    "The selected medicine is inactive or does not exist."
+                )
+                return render(
+                    request,
+                    "prescription/prescription_form.html",
+                    {
+                        "patients": patients,
+                        "doctors": doctors,
+                        "medicines": medicines,
+                    }
+                )
+
+            items.append({
+                "medicine_id": medicine.pk,
+                "dosage": dosage,
+                "quantity": quantity,
+            })
+
+        if not items:
+            messages.error(
+                request,
+                "Please select at least one medicine."
+            )
+            return render(
+                request,
+                "prescription/prescription_form.html",
+                {
+                    "patients": patients,
+                    "doctors": doctors,
+                    "medicines": medicines,
+                }
+            )
+
+        # Validate patient
+        patient = get_object_or_404(
+            Patient,
+            pk=patient_id
+        )
+
+        # Validate doctor
+        doctor = get_object_or_404(
+            Doctor,
+            pk=doctor_id
+        )
+
+        try:
+            prescription = create_prescription(
+                patient=patient,
+                doctor=doctor,
+                diagnosis=diagnosis,
+                regimen=regimen,
+                items=items,
+                user=request.user,
+            )
+
+            messages.success(
+                request,
+                "Prescription created successfully."
+            )
+
+            return redirect(
+                "prescription_detail",
+                pk=prescription.pk
+            )
+
+        except ValueError as e:
+            messages.error(request, str(e))
+
+        except Exception:
+            messages.error(
+                request,
+                "An unexpected error occurred while creating the prescription."
+            )
+
+    return render(
+        request,
+        "prescription/prescription_form.html",
+        {
+            "patients": patients,
+            "doctors": doctors,
+            "medicines": medicines,
+        }
+    )
+
+
+
+
 
 
 
 @login_required
 def prescription_edit(request, pk):
-    prescription = get_object_or_404(Prescription, pk=pk)
+
+    prescription = get_object_or_404(
+        Prescription,
+        pk=pk
+    )
+
     patients = Patient.objects.all()
     doctors = Doctor.objects.all()
     medicines = Medicine.objects.all()
-    prescription_items = PrescriptionItem.objects.filter(prescription=prescription)
+
+    prescription_items = PrescriptionItem.objects.filter(
+        prescription=prescription
+    )
 
     if request.method == "POST":
+
         patient_id = request.POST.get("patient")
         doctor_id = request.POST.get("doctor")
+
         diagnosis = request.POST.get("diagnosis")
         regimen = request.POST.get("regimen")
 
-        # Update prescription main fields
-        prescription.patient_id = patient_id
-        prescription.doctor_id = doctor_id
-        prescription.diagnosis = diagnosis
-        prescription.regimen = regimen
-        prescription.save()
-
-        # Delete existing items first
-        prescription_items.delete()
-
-        # Add updated medicine items
         medicine_ids = request.POST.getlist("medicine[]")
         dosages = request.POST.getlist("dosage[]")
         quantities = request.POST.getlist("quantity[]")
 
-        for med_id, dosage, qty in zip(medicine_ids, dosages, quantities):
+        items = []
+
+        # --------------------------------
+        # Prepare medicine items
+        # --------------------------------
+
+        for med_id, dosage, qty in zip(
+            medicine_ids,
+            dosages,
+            quantities
+        ):
+
             if med_id and qty:
-                PrescriptionItem.objects.create(
-                    prescription=prescription,
-                    medicine_id=med_id,
-                    dosage=dosage,
-                    quantity=int(qty)
+
+                try:
+
+                    quantity = int(qty)
+
+                except (ValueError, TypeError):
+
+                    messages.error(
+                        request,
+                        "Invalid medicine quantity."
+                    )
+
+                    return render(
+                        request,
+                        "prescription/prescription_form.html",
+                        {
+                            "prescription": prescription,
+                            "prescription_items": prescription_items,
+                            "patients": patients,
+                            "doctors": doctors,
+                            "medicines": medicines,
+                        }
+                    )
+
+                items.append(
+                    {
+                        "medicine_id": int(med_id),
+                        "dosage": dosage,
+                        "quantity": quantity,
+                    }
                 )
 
-        return redirect("prescription_detail", pk=prescription.pk)
+        # --------------------------------
+        # Validate Patient
+        # --------------------------------
 
-    return render(request, "prescription/prescription_form.html", {
-        "prescription": prescription,
-        "prescription_items": prescription_items,
-        "patients": patients,
-        "doctors": doctors,
-        "medicines": medicines
-    })
+        patient = get_object_or_404(
+            Patient,
+            pk=patient_id
+        )
+
+        # --------------------------------
+        # Validate Doctor
+        # --------------------------------
+
+        doctor = get_object_or_404(
+            Doctor,
+            pk=doctor_id
+        )
+
+        # --------------------------------
+        # Update Prescription
+        # --------------------------------
+
+        try:
+
+            update_prescription(
+                prescription=prescription,
+                patient=patient,
+                doctor=doctor,
+                diagnosis=diagnosis,
+                regimen=regimen,
+                items=items,
+                user=request.user,
+            )
+
+            messages.success(
+                request,
+                "Prescription updated successfully ✅"
+            )
+
+            return redirect(
+                "prescription_detail",
+                pk=prescription.pk
+            )
+
+        except ValueError as e:
+
+            messages.error(
+                request,
+                str(e)
+            )
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                f"Unexpected error: {e}"
+            )
+
+    # --------------------------------
+    # GET Request
+    # --------------------------------
+
+    return render(
+        request,
+        "prescription/prescription_form.html",
+        {
+            "prescription": prescription,
+            "prescription_items": prescription_items,
+            "patients": patients,
+            "doctors": doctors,
+            "medicines": medicines,
+        }
+    )
+
 
 
 @login_required
 def prescription_delete(request, pk):
-    prescription = get_object_or_404(Prescription, pk=pk)
-    if request.method == "POST":
-        prescription.delete()  # each item’s delete() will restock
-        messages.success(request, "Prescription deleted ✅")
-        return redirect("prescription_list")
-    return render(request, "prescription/prescription_confirm_delete.html", {
-        "prescription": prescription
-    })
 
-   
+    # -------------------------------------------------
+    # Get prescription
+    # -------------------------------------------------
+
+    prescription = get_object_or_404(
+        Prescription,
+        pk=pk
+    )
+
+    # =================================================
+    # POST
+    # =================================================
+
+    if request.method == "POST":
+
+        try:
+
+            # -----------------------------------------
+            # Delete through Service Layer
+            # -----------------------------------------
+
+            delete_prescription(
+                prescription
+            )
+
+            messages.success(
+                request,
+                "Prescription deleted and medicine stock restored successfully ✅"
+            )
+
+            return redirect(
+                "prescription_list"
+            )
+
+        except Exception:
+
+            messages.error(
+                request,
+                "An unexpected error occurred while deleting prescription."
+            )
+
+            return redirect(
+                "prescription_list"
+            )
+
+    # =================================================
+    # GET
+    # =================================================
+
+    return render(
+        request,
+        "prescription/prescription_confirm_delete.html",
+        {
+            "prescription": prescription
+        }
+    )
+
+
 
 
 
@@ -1635,30 +2322,99 @@ def export_expenses_excel(request):
 
 @group_required('Pharmacist')
 def pharmacist_dashboard(request):
-    total_medicines = Medicine.objects.count()
-    low_stock = Medicine.objects.filter(quantity__lte=10).count()
-    total_suppliers = Supplier.objects.count()
-    total_prescriptions = PrescriptionItem.objects.count()
-    total_sales = Invoice.objects.filter(service_type='medicine').aggregate(total=Sum('amount'))['total'] or 0
-    
+    today = timezone.localdate()
+    next_30_days = today + timedelta(days=30)
 
-    # Recent Activities
-    recent_prescriptions = PrescriptionItem.objects.select_related('prescription', 'medicine').order_by('-id')[:5]
-    recent_sales = Invoice.objects.filter(service_type='medicine').order_by('-id')[:5]
-    low_stock_medicines = Medicine.objects.filter(quantity__lte=10).order_by('quantity')[:5]
+    # 1. Total Medicines
+    total_medicines = Medicine.objects.count()
+
+    # 2. Low Stock Medicines (10 or less)
+    low_stock_medicines = (
+        Medicine.objects
+        .filter(quantity__lte=10)
+        .order_by('quantity')[:5]
+    )
+
+    low_stock = Medicine.objects.filter(quantity__lte=10).count()
+
+    # 3. Out of Stock
+    out_of_stock = Medicine.objects.filter(quantity=0).count()
+
+    # 4. Expired Medicines
+    expired_medicines = Medicine.objects.filter(
+        expiry_date__lt=today
+    ).count()
+
+    expired_medicine_list = (
+        Medicine.objects
+        .filter(expiry_date__lt=today)
+        .order_by('expiry_date')[:5]
+    )
+
+    # 5. Medicines Expiring Within 30 Days
+    expiring_soon = Medicine.objects.filter(
+        expiry_date__gte=today,
+        expiry_date__lte=next_30_days
+    ).count()
+
+    expiring_soon_medicines = (
+        Medicine.objects
+        .filter(
+            expiry_date__gte=today,
+            expiry_date__lte=next_30_days
+        )
+        .order_by('expiry_date')[:5]
+    )
+
+    # 6. Total Suppliers
+    total_suppliers = Supplier.objects.count()
+
+    # 7. Total Prescription Items
+    total_prescriptions = PrescriptionItem.objects.count()
+
+    # 8. Total Medicine Sales
+    total_sales = (
+        Invoice.objects
+        .filter(service_type='medicine')
+        .aggregate(total=Sum('amount'))['total']
+        or 0
+    )
+
+    # 9. Recent Prescriptions
+    recent_prescriptions = (
+        PrescriptionItem.objects
+        .select_related('prescription', 'medicine')
+        .order_by('-id')[:5]
+    )
+
+    # 10. Recent Sales
+    recent_sales = (
+        Invoice.objects
+        .filter(service_type='medicine')
+        .order_by('-id')[:5]
+    )
 
     context = {
         'total_medicines': total_medicines,
         'low_stock': low_stock,
+        'low_stock_medicines': low_stock_medicines,
+        'out_of_stock': out_of_stock,
+        'expired_medicines': expired_medicines,
+        'expired_medicine_list': expired_medicine_list,
+        'expiring_soon': expiring_soon,
+        'expiring_soon_medicines': expiring_soon_medicines,
         'total_suppliers': total_suppliers,
         'total_prescriptions': total_prescriptions,
         'total_sales': total_sales,
         'recent_prescriptions': recent_prescriptions,
         'recent_sales': recent_sales,
-        'low_stock_medicines': low_stock_medicines,
     }
-    return render(request, 'dashboards/pharmacist.html', context)
 
+    return render(
+        request,
+        'dashboards/pharmacist.html',
+        context
+    )
 
    
 
@@ -1707,4 +2463,198 @@ def finance_dashboard(request):
 
 
 
+@login_required
+def stock_history_excel(request):
+
+    transactions = StockTransaction.objects.select_related(
+        "medicine",
+        "performed_by",
+        "prescription",
+    ).all()
+
+    # Get filters
+    medicine = request.GET.get("medicine")
+    transaction_type = request.GET.get("transaction_type")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    # Medicine filter
+    if medicine:
+        transactions = transactions.filter(medicine__name__icontains=medicine)
+
+    # Transaction type filter
+    if transaction_type:
+        transactions = transactions.filter(
+            transaction_type=transaction_type
+        )
+
+    # From date filter
+    if start_date:
+        transactions = transactions.filter(
+            created_at__date__gte=start_date
+        )
+
+    # To date filter
+    if end_date:
+        transactions = transactions.filter(
+            created_at__date__lte=end_date
+        )
+
+    
+    # Create Excel workbook
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Stock History"
+
+    # Report title
+    worksheet.merge_cells("A1:H1")
+    worksheet["A1"] = "Stock History Report"
+    worksheet["A1"].font = Font(
+        name="Arial",
+        size=16,
+        bold=True,
+        color="FFFFFF",
+    )
+    worksheet["A1"].fill = PatternFill(
+        fill_type="solid",
+        fgColor="1F4E78",
+    )
+    worksheet["A1"].alignment = Alignment(
+        horizontal="center",
+        vertical="center",
+    )
+    worksheet.row_dimensions[1].height = 30
+
+    # Report generation date
+    worksheet.merge_cells("A2:H2")
+    worksheet["A2"] = f"Generated: {timezone.localtime().strftime('%Y-%m-%d %H:%M')}"
+    worksheet["A2"].font = Font(
+        name="Arial",
+        size=10,
+        italic=True,
+        color="666666",
+    )
+    worksheet["A2"].alignment = Alignment(horizontal="right")
+
+    # Column headers
+    headers = [
+        "Date",
+        "Medicine",
+        "Transaction Type",
+        "Quantity",
+        "Previous Stock",
+        "New Stock",
+        "Performed By",
+        "Note",
+    ]
+
+    for col_num, header in enumerate(headers, start=1):
+        cell = worksheet.cell(row=4, column=col_num, value=header)
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(
+            fill_type="solid",
+            fgColor="4472C4",
+        )
+        cell.alignment = Alignment(
+            horizontal="center",
+            vertical="center",
+        )
+
+    # Transaction data
+    for transaction in transactions:
+        worksheet.append([]) if False else None
+
+        row = [
+            transaction.created_at.strftime("%Y-%m-%d %H:%M"),
+            transaction.medicine.name,
+            transaction.get_transaction_type_display(),
+            transaction.quantity,
+            transaction.previous_quantity,
+            transaction.new_quantity,
+            (
+                transaction.performed_by.username
+                if transaction.performed_by
+                else ""
+            ),
+            transaction.note or "",
+        ]
+        worksheet.append(row)
+
+    # Style data rows
+    thin_gray = Side(style="thin", color="D9E2F3")
+
+    for row in worksheet.iter_rows(
+        min_row=5,
+        max_row=worksheet.max_row,
+        min_col=1,
+        max_col=8,
+    ):
+        for cell in row:
+            cell.border = Border(bottom=thin_gray)
+            cell.alignment = Alignment(vertical="center")
+
+        row[0].alignment = Alignment(horizontal="center")
+        for col_num in (4, 5, 6):
+            row[col_num - 1].number_format = "#,##0"
+
+    # Create filterable Excel table when data exists
+    if worksheet.max_row >= 5:
+        table = Table(
+            displayName="StockHistoryTable",
+            ref=f"A4:H{worksheet.max_row}",
+        )
+        table_style = TableStyleInfo(
+            name="TableStyleMedium2",
+            showFirstColumn=False,
+            showLastColumn=False,
+            showRowStripes=True,
+            showColumnStripes=False,
+        )
+        table.tableStyleInfo = table_style
+        worksheet.add_table(table)
+    else:
+        worksheet.auto_filter.ref = "A4:H4"
+
+    # Keep headers visible while scrolling
+    worksheet.freeze_panes = "A5"
+
+    # Column widths
+    widths = {
+        "A": 20,
+        "B": 25,
+        "C": 22,
+        "D": 14,
+        "E": 18,
+        "F": 16,
+        "G": 22,
+        "H": 32,
+    }
+
+    for column, width in widths.items():
+        worksheet.column_dimensions[column].width = width
+
+    # Print settings
+    worksheet.sheet_view.showGridLines = False
+    worksheet.page_setup.orientation = "landscape"
+    worksheet.page_setup.paperSize = worksheet.PAPERSIZE_A4
+    worksheet.page_setup.fitToWidth = 1
+    worksheet.page_setup.fitToHeight = 0
+    worksheet.sheet_properties.pageSetUpPr.fitToPage = True
+    worksheet.print_title_rows = "1:4"
+    worksheet.sheet_properties.pageSetUpPr.autoPageBreaks = False
+    worksheet.print_area = f"A1:H{worksheet.max_row}"
+
+    # Response
+    response = HttpResponse(
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
+    response["Content-Disposition"] = (
+        'attachment; filename="stock_history.xlsx"'
+    )
+
+    workbook.save(response)
+    return response
 

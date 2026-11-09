@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %} Stock Adjustment{% endblock %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <h4 class="page-title">Stock Adjustment</h4>
+            </div>
+        </div>
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field in form %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <div class="card-body">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close"
+                                data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <p class="text-muted">
+                Enter the actual quantity counted in the pharmacy.
+                The system will record the adjustment in Stock History.
+            </p>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="medicine" class="form-label">
+                        Select Medicine
+                    </label>
+
+                    <select name="medicine" id="medicine"
+                            class="form-select" required>
+                        <option value="">-- Select Medicine --</option>
+
+                        {% for medicine in medicines %}
+                            <option value="{{ medicine.pk }}">
+                                {{ medicine.name }}
+                                | Batch: {{ medicine.batch_no }}
+                                | Current Stock: {{ medicine.quantity }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="actual_quantity" class="form-label">
+                        Actual Quantity
+                    </label>
+
+                    <input type="number"
+                           name="actual_quantity"
+                           id="actual_quantity"
+                           class="form-control"
+                           min="0"
+                           step="1"
+                           required>
+
+                    <small class="form-text text-muted">
+                        Enter the quantity physically counted.
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="note" class="form-label">
+                        Reason for Adjustment
+                    </label>
+
+                    <textarea name="note"
+                              id="note"
+                              class="form-control"
+                              rows="3"
+                              maxlength="255"
+                              placeholder="Example: Physical stock count discrepancy"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Adjustment
+                </button>
+
+                <a href="{% url 'stock_history' %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

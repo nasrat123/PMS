@@ -108,10 +108,14 @@ urlpatterns = [
     path('patients/<int:pk>/delete/', views.patient_delete, name='patient_delete'),
 
     path('medicines/', views.medicine_list, name='medicine_list'),
+    path('stock-history/', views.stock_history, name='stock_history'),
+    path('stock-adjustment/', views.stock_adjustment_create, name='stock_adjustment_create'),
+    path('medicines/restock/', views.medicine_restock_create, name='medicine_restock_create'),
     path('medicines/add/', views.medicine_create, name='medicine_create'),
     path('medicines/<int:pk>/', views.medicine_detail, name='medicine_detail'),
     path('medicines/<int:pk>/edit/', views.medicine_update, name='medicine_update'),
     path('medicines/<int:pk>/delete/', views.medicine_delete, name='medicine_delete'),
+    path('medicines/<int:pk>/toggle-status/', views.medicine_toggle_status, name='medicine_toggle_status'),
 
 
     path('suppliers/', views.supplier_list, name='supplier_list'),
@@ -164,6 +168,7 @@ urlpatterns = [
     # Exports
     path('expenses/export/pdf/', views.export_expenses_pdf, name='expense_export_pdf'),
     path('expenses/export/excel/', views.export_expenses_excel, name='expense_export_excel'),
+    path('stock-history/excel/', views.stock_history_excel, name='stock_history_excel'),
 
 
 

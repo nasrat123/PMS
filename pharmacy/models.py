@@ -257,6 +257,7 @@ class Medicine(models.Model):
     description = models.TextField(blank=True, null=True)
     expiry_date = models.DateField()
     quantity = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -286,9 +287,11 @@ class MedicineRestock(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     quantity_added = models.PositiveIntegerField()
     date = models.DateTimeField(auto_now_add=True)
+    performed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="medicine_restocks")
 
     def __str__(self):
         return f"{self.medicine.name} restocked by {self.quantity_added}"
+
 
 
 # -------------------------------
@@ -304,6 +307,7 @@ class LabExamination(models.Model):
 
     def total_cost(self):
         return sum(item.price for item in self.items.all())
+
 
 
 # -------------------------------
@@ -372,50 +376,24 @@ class PrescriptionItem(models.Model):
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     dosage = models.CharField(max_length=100)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["prescription","medicine"],
+                name="unique_medicine_per_prescription"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(quantity__gt=0),
+                name="prescription_item_quantity_gt_zero"
+            ),
 
+        ]
     def __str__(self):
         return f"{self.medicine.name} x {self.quantity}"
 
     def total_price(self):
         return self.medicine.selling_price * self.quantity
 
-    def save(self, *args, **kwargs):
-        """
-        Adjust stock on create and update:
-          - On create: reduce by quantity.
-          - On update: compute delta; reduce or restock accordingly.
-          - If medicine changed: restock old medicine qty, reduce new medicine qty.
-        """
-        if self.pk:
-            old = PrescriptionItem.objects.get(pk=self.pk)
-
-            if old.medicine_id != self.medicine_id:
-                # Return old stock
-                old.medicine.restock(old.quantity)
-                # Take from new
-                if self.medicine.quantity < self.quantity:
-                    raise ValueError(f"Not enough stock for {self.medicine.name}")
-                self.medicine.reduce_stock(self.quantity)
-            else:
-                delta = self.quantity - old.quantity
-                if delta > 0:
-                    if self.medicine.quantity < delta:
-                        raise ValueError(f"Not enough stock for {self.medicine.name}")
-                    self.medicine.reduce_stock(delta)
-                elif delta < 0:
-                    self.medicine.restock(-delta)
-        else:
-            # Create
-            if self.medicine.quantity < self.quantity:
-                raise ValueError(f"Not enough stock for {self.medicine.name}")
-            self.medicine.reduce_stock(self.quantity)
-
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        # Restock on delete
-        self.medicine.restock(self.quantity)
-        super().delete(*args, **kwargs)
 
 
 # -------------------------------
@@ -445,6 +423,72 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice for {self.patient.full_name} - {self.service_type}"
+
+
+# -------------------------------
+# StockTransaction Model
+# -------------------------------
+class StockTransaction(models.Model):
+
+    TRANSACTION_TYPES = [
+        ("IN", "Stock In"),
+        ("OUT", "Stock Out"),
+        ("RETURN", "Stock Return"),
+        ("ADJUSTMENT", "Adjustment"),
+    ]
+
+    medicine = models.ForeignKey(
+        Medicine,
+        on_delete=models.CASCADE,
+        related_name="stock_transactions"
+    )
+
+    transaction_type = models.CharField(
+        max_length=20,
+        choices=TRANSACTION_TYPES
+    )
+
+    quantity = models.PositiveIntegerField()
+
+    previous_quantity = models.PositiveIntegerField()
+
+    new_quantity = models.PositiveIntegerField()
+
+    prescription = models.ForeignKey(
+        Prescription,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="stock_transactions"
+    )
+
+    performed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="stock_transactions"
+    )
+
+    note = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return (
+            f"{self.medicine.name} - "
+            f"{self.transaction_type} - "
+            f"{self.quantity}"
+        )
 
 
 class Expense(models.Model):

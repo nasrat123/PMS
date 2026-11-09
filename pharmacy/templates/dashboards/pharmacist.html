@@ -2,101 +2,316 @@
 {% load static %}
 
 {% block breadcrumbs %}
-    <li class="active"> Dashboard</li>
+    <li class="active">Pharmacy Dashboard</li>
 {% endblock %}
 
 {% block extra_css %}
-       
+<style>
+    .pharmacy-dashboard .dash-widget {
+        min-height: 120px;
+    }
+
+    .pharmacy-dashboard .card {
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .pharmacy-dashboard .card-header {
+        background: #fff;
+        border-bottom: 1px solid #eee;
+    }
+
+    .pharmacy-dashboard .card-title {
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+
+    .pharmacy-dashboard .table th {
+        white-space: nowrap;
+    }
+
+    .pharmacy-dashboard .table td {
+        vertical-align: middle;
+    }
+
+    .pharmacy-dashboard .status-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .pharmacy-dashboard .badge-danger {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    .pharmacy-dashboard .badge-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .pharmacy-dashboard .badge-success {
+        background: #198754;
+        color: #fff;
+    }
+
+    .pharmacy-dashboard .badge-info {
+        background: #0dcaf0;
+        color: #212529;
+    }
+
+    .pharmacy-dashboard .section-icon {
+        margin-right: 6px;
+    }
+
+    .pharmacy-dashboard .empty-state {
+        text-align: center;
+        color: #777;
+        padding: 20px !important;
+    }
+
+    .pharmacy-dashboard .medicine-name {
+        font-weight: 600;
+    }
+
+    .pharmacy-dashboard .dashboard-heading {
+        margin-bottom: 20px;
+    }
+
+    .pharmacy-dashboard .dashboard-heading h3 {
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .pharmacy-dashboard .dashboard-heading p {
+        color: #777;
+        margin-bottom: 0;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="page-wrapper">
+
+<div class="page-wrapper pharmacy-dashboard">
     <div class="content">
+
+        <!-- Dashboard Heading -->
+        <div class="dashboard-heading">
+            <h3>
+                <i class="fa fa-medkit"></i>
+                Pharmacy Dashboard
+            </h3>
+            <p>Monitor medicine stock, expiry dates, prescriptions and sales.</p>
+        </div>
+
+        <!-- Dashboard Summary Cards -->
         <div class="row">
+
+            <!-- Total Medicines -->
             <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
                 <div class="dash-widget">
-                    <span class="dash-widget-bg4"><i class="fa fa-medkit" aria-hidden="true"></i></span>
+                    <span class="dash-widget-bg4">
+                        <i class="fa fa-medkit" aria-hidden="true"></i>
+                    </span>
+
                     <a href="{% url 'medicine_list' %}">
-                    <div class="dash-widget-info text-right">
-                        <h3>{{ total_medicines }}</h3>
-                        <span class="widget-title4">Medicines <i class="fa fa-check" aria-hidden="true"></i></span>
-                    </div>
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
-                <div class="dash-widget">
-                    <span class="dash-widget-bg1"><i class="fa fa-medkit" aria-hidden="true"></i></span>
-                    <a href="">
-                    <div class="dash-widget-info text-right">
-                        <h3>{{ low_stock }}</h3>
-                        <span class="widget-title1">Low Stock Items <i class="fa fa-check" aria-hidden="true"></i></span>
-                    </div>
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
-                <div class="dash-widget">
-                    <span class="dash-widget-bg2"><i class="fa fa-file-text"></i></span>
-                    <a href="{% url 'prescription_list' %}">
-                    <div class="dash-widget-info text-right">
-                        <h3>{{ total_prescriptions }}</h3>
-                        <span class="widget-title2">Prescriptions Processed <i class="fa fa-check" aria-hidden="true"></i></span>
-                    </div>
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
-                <div class="dash-widget">
-                    <span class="dash-widget-bg3"><i class="fa fa-truck" aria-hidden="true"></i></span>
-                    <a href="{% url 'supplier_list' %}">
-                    <div class="dash-widget-info text-right">
-                        <h3>{{ total_suppliers }}</h3>
-                        <span class="widget-title3">Suppliers <i class="fa fa-check" aria-hidden="true"></i></span>
-                    </div>
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ total_medicines }}</h3>
+                            <span class="widget-title4">
+                                Total Medicines
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </span>
+                        </div>
                     </a>
                 </div>
             </div>
 
+            <!-- Low Stock -->
             <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
                 <div class="dash-widget">
-                    <span class="dash-widget-bg4"><i class="fa fa-money" aria-hidden="true"></i></span>
-                    <a href="{% url 'invoice_list' %}">
-                    <div class="dash-widget-info text-right">
-                        <h3>{{ total_sales }}</h3>
-                        <span class="widget-title4">Total Sales (Paid)<i class="fa fa-check" aria-hidden="true"></i></span>
-                    </div>
+                    <span class="dash-widget-bg1">
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'medicine_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ low_stock }}</h3>
+                            <span class="widget-title1">
+                                Low Stock Items
+                                <i class="fa fa-warning" aria-hidden="true"></i>
+                            </span>
+                        </div>
                     </a>
                 </div>
             </div>
+
+            <!-- Total Prescriptions -->
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg2">
+                        <i class="fa fa-file-text" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'prescription_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ total_prescriptions }}</h3>
+                            <span class="widget-title2">
+                                Prescription Items
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Suppliers -->
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg3">
+                        <i class="fa fa-truck" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'supplier_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ total_suppliers }}</h3>
+                            <span class="widget-title3">
+                                Suppliers
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Total Sales -->
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg4">
+                        <i class="fa fa-money" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'invoice_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ total_sales|floatformat:2 }}</h3>
+                            <span class="widget-title4">
+                                Medicine Sales
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Out of Stock -->
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg1">
+                        <i class="fa fa-ban" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'medicine_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ out_of_stock }}</h3>
+                            <span class="widget-title1">
+                                Out of Stock
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Expired Medicines -->
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg1">
+                        <i class="fa fa-calendar-times-o" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'medicine_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ expired_medicines }}</h3>
+                            <span class="widget-title1">
+                                Expired Medicines
+                                <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Expiring Soon -->
+            <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
+                <div class="dash-widget">
+                    <span class="dash-widget-bg3">
+                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                    </span>
+
+                    <a href="{% url 'medicine_list' %}">
+                        <div class="dash-widget-info text-right">
+                            <h3>{{ expiring_soon }}</h3>
+                            <span class="widget-title3">
+                                Expiring Within 30 Days
+                                <i class="fa fa-clock-o" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
         </div>
+
+        <!-- Recent Activity Tables -->
         <div class="row">
-            <div class="col-md-12 col-lg-4">
+
+            <!-- Recent Prescriptions -->
+            <div class="col-md-12 col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Recent Prescriptions</h4>
+                        <h4 class="card-title">
+                            <i class="fa fa-file-text section-icon"></i>
+                            Recent Prescriptions
+                        </h4>
                     </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table mb-0">
+                            <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th>PresID</th>
+                                        <th>Pres. ID</th>
                                         <th>Medicine</th>
                                         <th>Quantity</th>
                                         <th>Date</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {% for item in recent_prescriptions %}
                                     <tr>
-                                        <td><a href="{% url 'prescription_detail' item.prescription.id %}">{{ item.prescription.id }}</a></td>
+                                        <td>
+                                            <a href="{% url 'prescription_detail' item.prescription.id %}">
+                                                #{{ item.prescription.id }}
+                                            </a>
+                                        </td>
+
                                         <td>{{ item.medicine.name }}</td>
+
                                         <td>{{ item.quantity }}</td>
-                                        <td>{{ item.prescription.date|date:"Y-m-d" }}</td>
+
+                                        <td>
+                                            {{ item.prescription.date|date:"Y-m-d" }}
+                                        </td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="3" class="text-center">No recent prescriptions</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="empty-state">
+                                            No recent prescriptions found.
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -106,34 +321,58 @@
             </div>
 
             <!-- Recent Sales -->
-            <div class="col-md-12 col-lg-4">
+            <div class="col-md-12 col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Recent Sales</h4>
+                        <h4 class="card-title">
+                            <i class="fa fa-money section-icon"></i>
+                            Recent Medicine Sales
+                        </h4>
                     </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table mb-0">
+                            <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th>Invoice #</th>
                                         <th>Patient</th>
-                                        <th>Total</th>
+                                        <th>Amount</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {% for sale in recent_sales %}
                                     <tr>
-                                        <td><a href="{% url 'invoice_detail' sale.id %}">{{ sale.id }}</a></td>
-                                        <td>{{ sale.patient.full_name }}</td>
-                                        <td>{{ sale.amount }}</td>
                                         <td>
-                                            <span class="badge badge-success">{{ sale.status }}</span>
+                                            <a href="{% url 'invoice_detail' sale.id %}">
+                                                #{{ sale.id }}
+                                            </a>
+                                        </td>
+
+                                        <td>
+                                            {% if sale.patient %}
+                                                {{ sale.patient.full_name }}
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>{{ sale.amount|floatformat:2 }}</td>
+
+                                        <td>
+                                            <span class="status-badge badge-info">
+                                                {{ sale.status }}
+                                            </span>
                                         </td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="3" class="text-center">No recent sales</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="empty-state">
+                                            No recent medicine sales found.
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -142,31 +381,153 @@
                 </div>
             </div>
 
-            <!-- Low Stock Alerts -->
-            <div class="col-md-12 col-lg-4">
+        </div>
+
+        <!-- Stock Alerts -->
+        <div class="row">
+
+            <!-- Low Stock Medicines -->
+            <div class="col-md-12 col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Low Stock Medicines</h4>
+                        <h4 class="card-title">
+                            <i class="fa fa-exclamation-triangle text-warning section-icon"></i>
+                            Low Stock Medicines
+                        </h4>
                     </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table mb-0">
+                            <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th>Medicine</th>
-                                        <th>Stock</th>
+                                        <th>Batch No.</th>
+                                        <th>Available Stock</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {% for med in low_stock_medicines %}
                                     <tr>
-                                        <td>{{ med.name }}</td>
+                                        <td class="medicine-name">{{ med.name }}</td>
+                                        <td>{{ med.batch_no }}</td>
+
                                         <td>
-                                            <span class="badge badge-danger">{{ med.quantity }}</span>
+                                            {% if med.quantity == 0 %}
+                                                <span class="status-badge badge-danger">
+                                                    Out of Stock
+                                                </span>
+                                            {% else %}
+                                                <span class="status-badge badge-warning">
+                                                    {{ med.quantity }}
+                                                </span>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="2" class="text-center">All medicines in stock</td></tr>
+                                    <tr>
+                                        <td colspan="3" class="empty-state">
+                                            No low-stock medicines found.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expired Medicines -->
+            <div class="col-md-12 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">
+                            <i class="fa fa-calendar-times-o text-danger section-icon"></i>
+                            Expired Medicines
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Medicine</th>
+                                        <th>Batch No.</th>
+                                        <th>Expiry Date</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for med in expired_medicine_list %}
+                                    <tr>
+                                        <td class="medicine-name">{{ med.name }}</td>
+                                        <td>{{ med.batch_no }}</td>
+                                        <td>
+                                            <span class="status-badge badge-danger">
+                                                {{ med.expiry_date|date:"Y-m-d" }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="empty-state">
+                                            No expired medicines found.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Expiring Soon Medicines -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">
+                            <i class="fa fa-clock-o text-warning section-icon"></i>
+                            Medicines Expiring Within 30 Days
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Medicine</th>
+                                        <th>Batch No.</th>
+                                        <th>Available Stock</th>
+                                        <th>Expiry Date</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for med in expiring_soon_medicines %}
+                                    <tr>
+                                        <td class="medicine-name">{{ med.name }}</td>
+                                        <td>{{ med.batch_no }}</td>
+                                        <td>{{ med.quantity }}</td>
+                                        <td>
+                                            <span class="status-badge badge-warning">
+                                                {{ med.expiry_date|date:"Y-m-d" }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="empty-state">
+                                            No medicines expiring within 30 days.
+                                        </td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -175,8 +536,8 @@
                 </div>
             </div>
         </div>
+
     </div>
-    
 </div>
 
 {% endblock %}

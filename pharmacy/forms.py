@@ -1,8 +1,29 @@
 from django import forms
-from .models import Doctor, Patient , Medicine , Supplier, LabExamination, BirthRegistration, Expense, Employee, Department, LabExaminationItem, Appointment, Prescription,PrescriptionItem, Invoice, Donor, BloodDonation, BloodRequest, BloodGroup, BloodStock
+from .models import Doctor, Patient , Medicine, MedicineRestock, Supplier, LabExamination, BirthRegistration, Expense, Employee, Department, LabExaminationItem, Appointment, Prescription,PrescriptionItem, Invoice, Donor, BloodDonation, BloodRequest, BloodGroup, BloodStock
 from ckeditor.widgets import CKEditorWidget
 from django.forms.models import inlineformset_factory, modelformset_factory
 from datetime import date
+
+
+
+class MedicineRestockForm(forms.ModelForm):
+
+    class Meta:
+        model = MedicineRestock
+
+        fields = [
+            "medicine",
+            "quantity_added",
+        ]
+
+        widgets = {
+            "medicine": forms.Select(attrs={'class': 'form-control'}),
+
+            "quantity_added": forms.TextInput(attrs={'class': 'form-control'})
+        }
+
+        
+
 
 class DoctorForm(forms.ModelForm):
     class Meta:
@@ -312,15 +333,36 @@ class PrescriptionForm(forms.ModelForm):
             "regimen": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
+
 class PrescriptionItemForm(forms.ModelForm):
+
     class Meta:
         model = PrescriptionItem
         fields = ["medicine", "quantity", "dosage"]
+
         widgets = {
-            "medicine": forms.Select(attrs={"class": "form-control"}),
-            "quantity": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
-            "dosage": forms.TextInput(attrs={"class": "form-control"}),
+            "medicine": forms.Select(
+                attrs={"class": "form-control"}
+            ),
+            "quantity": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 1
+                }
+            ),
+            "dosage": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Show only active medicines for new prescription items
+        self.fields["medicine"].queryset = Medicine.objects.filter(
+            is_active=True
+        ).order_by("name")
+
 
 PrescriptionItemFormSet = inlineformset_factory(
     parent_model=Prescription,

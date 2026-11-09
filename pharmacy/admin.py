@@ -18,13 +18,19 @@ from .models import (
     Donor, 
     BloodDonation, 
     BloodRequest,
-    BirthRegistration
+    BirthRegistration,
+    MedicineRestock,
+    StockTransaction
 )
 
 
 @admin.register(BloodGroup)
 class BloodGroupAdmin(admin.ModelAdmin):
     list_display = ('name',)
+
+@admin.register(MedicineRestock)
+class MedicineRestockAdmin(admin.ModelAdmin):
+    list_display = ('medicine',)
 
 @admin.register(BloodStock)
 class BloodStockAdmin(admin.ModelAdmin):
@@ -130,3 +136,59 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'amount', 'date', 'added_by', 'created_at')
     list_filter = ('category', 'date')
     search_fields = ('title', 'description')
+
+
+
+
+
+@admin.register(StockTransaction)
+class StockTransactionAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "created_at",
+        "medicine",
+        "transaction_type",
+        "quantity",
+        "previous_quantity",
+        "new_quantity",
+        "prescription",
+        "performed_by",
+    )
+
+    list_filter = (
+        "transaction_type",
+        "created_at",
+        "medicine",
+    )
+
+    search_fields = (
+        "medicine__name",
+        "medicine__batch_no",
+        "prescription__patient__full_name",
+        "performed_by__username",
+    )
+
+    ordering = (
+        "-created_at",
+    )
+
+    readonly_fields = (
+        "medicine",
+        "transaction_type",
+        "quantity",
+        "previous_quantity",
+        "new_quantity",
+        "prescription",
+        "performed_by",
+        "note",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
